@@ -1,202 +1,55 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CoachXPro Lift Builder™ — Integrated Block</title>
-  <style>
-    :root{--red:#ff0000;--gray:#f5f5f5;--bg:#fff;--text:#111}
-    #cxp-app,*{box-sizing:border-box;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue",sans-serif}
-    #cxp-app{max-width:720px;margin:2rem auto;padding:1rem}
-    .card{background:var(--gray);border-radius:1rem;padding:1rem;margin-bottom:1.5rem;box-shadow:0 4px 8px rgba(0,0,0,.05)}
-    .title{font-weight:600;margin-bottom:.5rem}
-    .options{display:flex;flex-direction:column;gap:.5rem;margin-top:.25rem}
-    .opt{display:flex;align-items:center;gap:.5rem;padding:.75rem 1rem;border:2px solid transparent;border-radius:.75rem;background:#fff;cursor:pointer;transition:border .2s}
-    .opt:hover{border-color:var(--red)}
-    .opt input{accent-color:var(--red)}
-    .opt input:checked+span{font-weight:600;color:var(--red)}
-    button.next{width:100%;padding:.75rem;background:var(--red);color:#fff;font-weight:600;border:none;border-radius:.75rem;cursor:pointer;margin-top:1rem;transition:opacity .2s}
-    button.next:disabled{opacity:.5;cursor:not-allowed}
-    .cat-head{margin:.75rem 0 .25rem;font-weight:600}
-    .req{font-size:.8rem;opacity:.7}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>CoachXPro Lift Builder — Integrated Block</title>
+<style>
+:root{--red:#e10b0b;--gray:#f4f4f4}
+#app,*{box-sizing:border-box;font-family:system-ui,sans-serif}
+#app{max-width:720px;margin:2rem auto;padding:1rem}
+.card{background:var(--gray);border-radius:1rem;padding:1rem;margin-bottom:1.25rem;box-shadow:0 4px 8px rgba(0,0,0,.05)}
+.title{font-weight:600;margin-bottom:.5rem}
+.options{display:flex;flex-direction:column;gap:.5rem;margin-top:.25rem}
+.opt{display:flex;align-items:center;gap:.5rem;padding:.75rem 1rem;border:2px solid transparent;border-radius:.75rem;background:#fff;cursor:pointer}
+.opt:hover{border-color:var(--red)}
+.opt input{accent-color:var(--red)}
+.opt input:checked+span{font-weight:600;color:var(--red)}
+button.next{width:100%;padding:.75rem;background:var(--red);color:#fff;font-weight:600;border:none;border-radius:.75rem;margin-top:1rem}
+button.next:disabled{opacity:.5}
+.cat-head{margin:.75rem 0 .25rem;font-weight:600}
+.req{font-size:.8rem;opacity:.7}
+</style>
 </head>
 <body>
-  <div id="cxp-app"></div>
-
+<div id="app"></div>
 <script>
-// ========== Lift Libraries ==========
-const BODYBUILDING = [
-  "Rotational Step-Ups","Flys","Lunges","Lat Pulldown","Stooped Russian Twists","V-Sits",
-  "Hanging Lateral Leg Lifts","Good Mornings","DB Alternating Toe Touches","Twisting Sit-ups",
-  "Pullovers","Russian Twists (Hay Bales)","Lunge w/ Twist","Single-Arm Bent Over Row",
-  "Weighted Crunches","Straight-Leg Deadlift","Arm Curls","Seated Shoulder Press","Dips",
-  "Push-ups (Feet Elevated)","Back Hypers","Pullups","Russian Twists - Standing","DB Lateral Flys",
-  "Inverted Row","Military Press","Weighted Back Hyper","Hanging Knee Raises","Overhead Twist",
-  "Seated Good Mornings","Toe Risers","Repeated Crossover Step Ups"
-];
-
-const REGIONAL = [
-  "RDL","Hip Thrust","Step-Ups","DB Row","Lat Pull-Down",
-  "Nordic Curl","Split-Stance RDL","Single-Leg Glute Bridge","Back Extension","B-Stance Squat"
-];
-
-const BALLISTIC = [
-  "Jump Squat","Trap-Bar Jump","Bench Press Throw","Overhead Med-Ball Throw",
-  "Underhand Forward Throw","Split-Jerk Jump","Kettlebell Swing","Medicine-Ball Slam"
-];
-
-const OLYMPIC_STANDARD = ["Power Clean","Power Snatch","Full Snatch","Clean & Jerk"];
-const OLYMPIC_DERIV = ["Hang Clean","Hang Snatch","Mid-Thigh Clean Pull","High Pull"];
-const OLYMPIC_MOD   = ["Clean Pull","Snatch Pull","DB Snatch","Muscle Clean"];
-
-const LIFTS = {
-  static:["Back Squat","Front Squat","Trap-Bar Deadlift","Conventional Deadlift","Split Squat (heavy)","Bench Press","Incline Bench","Weighted Pull-ups","Military Press","Weighted Dips"],
-  regional:REGIONAL,
-  olympic:[...OLYMPIC_STANDARD,...OLYMPIC_DERIV,...OLYMPIC_MOD],
-  ballistic:BALLISTIC,
-  rs:["Continuous Hurdle Hops","Bounding Series","Single-Leg Pogos","Overhead Back MB Heave"],
-  bb:BODYBUILDING
+// ===== Arrays =====
+const BB_CIRCUITS={
+ 1:["Rotational Step‑Ups","Lunges","Lat Pulldown","Stooped Russian Twists","Good Mornings","DB Toe Touches"],
+ 2:["Pullovers","Russian Twists (Hay Bales)","Single‑Arm Row","Weighted Crunches","Straight‑Leg Deadlift","Arm Curls"],
+ 3:["Seated Shoulder Press","Dips","Push‑ups (Feet Elevated)","Back Hypers","Pullups","Standing Russian Twist"],
+ 4:["Inverted Row","Military Press","Weighted Back Hyper","Hanging Knee Raises","Overhead Twist","Toe Risers","Crossover Step‑Ups","Face Pulls","DB Lateral Flys","Seated Good Morning","V‑Sits","Hanging Leg Raise"]
 };
+const REGIONAL=["RDL","Hip Thrust","Step‑Ups","DB Row","Lat Pull‑Down","Nordic Curl"];
+const BALLISTIC=["Jump Squat","Trap‑Bar Jump","Bench Press Throw","Overhead Med‑Ball Throw","Split‑Jerk Jump"];
+const OLYMPIC=["Power Clean","Hang Clean","Power Snatch","Mid‑Thigh Clean Pull","Snatch Pull","Clean Pull","Snatch Pull","DB Snatch"];
+const STATIC=["Back Squat","Front Squat","Trap‑Bar Deadlift","Conventional Deadlift","Split Squat (heavy)","Bench Press","Incline Bench","Weighted Pull‑ups","Military Press","Weighted Dips"];
+const RS=["Continuous Hurdle Hops","Bounding Series","Single‑Leg Pogos","Overhead Back MB Heave"];
+const LIFTS={static:STATIC,regional:REGIONAL,olympic:OLYMPIC,ballistic:BALLISTIC,rs:RS};
 
-// ========== Scheme Table ==========
-const SCHEMES={
-  RFD:{sets:"5-9",reps:"1-2",pct:"90-100%",rest:"3-5 min"},
-  RFDP:{sets:"4-9",reps:"2-4",pct:"70-85%",rest:"2-3 min"},
-  BPD:{sets:"4-9",reps:"4-5",pct:"50-65%",rest:"2-3 min"},
-  ASD:{sets:"4-8",reps:"1-5",pct:"80-100%",rest:"3-5 min"},
-  ASC:{sets:"3-6",reps:"4-8",pct:"60-80%",rest:"2-3 min"},
-  BB:{sets:"Circuit",reps:"10-12",pct:"Moderate",rest:"60-90 s"},
-  RS:{sets:"3-8",reps:"5-12",pct:"BW-50%",rest:"1-2 min"}
-};
+const SCHEMES={RFD:{sets:"5‑9",reps:"1‑2",pct:"90‑100%",rest:"3‑5 min"},RFDP:{sets:"4‑9",reps:"2‑4",pct:"70‑85%",rest:"2‑3 min"},BPD:{sets:"4‑9",reps:"4‑5",pct:"50‑65%",rest:"2‑3 min"},ASD:{sets:"4‑8",reps:"1‑5",pct:"80‑100%",rest:"3‑5 min"},ASC:{sets:"3‑6",reps:"4‑8",pct:"60‑80%",rest:"2‑3 min"},BB:{sets:"Circuit",reps:"10‑12",pct:"-",rest:"60‑90 s"},RS:{sets:"3‑8",reps:"5‑12",pct:"BW‑50%",rest:"1‑2 min"}};
 
-// ========= State =========
-const S={season:null,phase:null,track:null,scheme:null,chosen:{}};
-const mount=document.getElementById('cxp-app');
+const S={};
+const app=document.getElementById('app');
 
-// ========= Helper =========
-function getReq(phase,scheme){
-  const r={static:0,regional:0,olympic:0,ballistic:0,rs:0,bb:0};
-  switch(phase){
-    case 'acc':
-      if(['ASD','ASC'].includes(scheme)){r.static=1;r.regional=1;}
-      if(scheme==='BPD')r.olympic=1;
-      if(scheme==='BB') r.bb=12;
-    break;
-    case 'trans':
-      if(['ASD','ASC'].includes(scheme))r.static=1;
-      if(['RFDP','RFD'].includes(scheme)){r.olympic=1;r.ballistic=1;}
-      if(scheme==='RS') r.rs=2;
-      r.regional=1;
-    break;
-    case 'real':
-      if(['RFD','RFDP'].includes(scheme)){r.olympic=1;r.ballistic=1;}
-      if(scheme==='ASC')r.static=1;
-    break;
-    case 'main':
-      if(scheme==='BPD')r.olympic=1;
-      if(scheme==='RS'){r.ballistic=1;r.rs=1;}
-    break;
-  }
-  return r;
-}
-function prescribe(cat,scheme){
-  if(cat==='regional')return'3×8-10 @ 60-70%';
-  if(cat==='ballistic')return'3×6 fast';
-  if(cat==='rs')return`${SCHEMES.RS.sets}×${SCHEMES.RS.reps}`;
-  if(cat==='bb')return'See circuit note';
-  const sc=SCHEMES[scheme];
-  return`${sc.sets}×${sc.reps} @ ${sc.pct}`;
-}
-function radioCard(title,opts,key,next){
-  const c=document.createElement('div');c.className='card';
-  c.innerHTML=`<div class="title">${title}</div>`;
-  const box=document.createElement('div');box.className='options';c.appendChild(box);
-  opts.forEach(o=>{
-    const id=`${key}-${o.value}`;
-    box.insertAdjacentHTML('beforeend',`<label class="opt" for="${id}"><input type="radio" id="${id}" name="${key}" value="${o.value}"><span>${o.label}</span>${o.sub?`<span style="font-size:.8rem;opacity:.7;">${o.sub}</span>`:''}</label>`);
-  });
-  const btn=document.createElement('button');btn.className='next';btn.textContent='Next';btn.disabled=true;c.appendChild(btn);
-  c.addEventListener('change',()=>btn.disabled=false);
-  btn.onclick=()=>{const sel=c.querySelector('input:checked');if(!sel)return;S[key]=sel.value;next();};
-  return c;
-}
-function exerciseCard(req,next){
-  const c=document.createElement('div');c.className='card';
-  c.innerHTML='<div class="title">5️⃣ Choose your lifts</div><p style="margin:.25rem 0 .75rem">Select exactly the required number from each category.</p>';
-  Object.keys(req).forEach(cat=>{
-    if(req[cat]===0)return;
-    c.insertAdjacentHTML('beforeend',`<div class="cat-head">${cat.toUpperCase()} <span class="req">(choose ${req[cat]})</span></div>`);
-    const box=document.createElement('div');box.className='options';c.appendChild(box);
-    LIFTS[cat].forEach(l=>{
-      const id=`${cat}-${l.replace(/\s+/g,'-')}`;
-      box.insertAdjacentHTML('beforeend',`<label class="opt" for="${id}"><input type="checkbox" id="${id}" data-cat="${cat}" value="${l}"><span>${l}</span></label>`);
-    });
-  });
-  const btn=document.createElement('button');btn.className='next';btn.textContent='Finish';btn.disabled=true;c.appendChild(btn);
-  c.addEventListener('change',()=>{
-    const counts={};Object.keys(req).forEach(k=>counts[k]=0);
-    c.querySelectorAll('input[type="checkbox"]:checked').forEach(cb=>counts[cb.dataset.cat]++);
-    btn.disabled=!Object.keys(req).every(k=>req[k]===0||counts[k]===req[k]);
-  });
-  btn.onclick=()=>{
-    S.chosen={};
-    c.querySelectorAll('input[type="checkbox"]:checked').forEach(cb=>{
-      const cat=cb.dataset.cat;(S.chosen[cat]=S.chosen[cat]||[]).push(cb.value);
-    });
-    next();
-  };
-  return c;
-}
-function workoutHTML(){
-  const sc=SCHEMES[S.scheme];
-  let items='';
-  Object.keys(S.chosen).forEach(cat=>{
-    S.chosen[cat].forEach(l=>{items+=`<li>${l} — ${prescribe(cat,S.scheme)}</li>`;});
-  });
-  return `<div class='card'><h2 class='title'>🏋️ Your Workout</h2>
-    <p><strong>Scheme:</strong> ${S.scheme} &nbsp;→&nbsp; ${sc.sets}×${sc.reps} @ ${sc.pct} (${sc.rest})</p>
-    <ul>${items}</ul>
-    <button class='next' onclick='start()'>Start Over</button>
-  </div>`;
-}
-// ========= Flow =========
-function start(){
-  mount.innerHTML='';
-  mount.appendChild(radioCard('1️⃣ Season?',[
-    {label:'Off-Season',value:'off',sub:'Summer / break'},
-    {label:'Pre-Season',value:'pre',sub:'Fall / early‑winter'},
-    {label:'In-Season',value:'in',sub:'Competition'}],'season',()=>{
-      mount.innerHTML='';
-      mount.appendChild(radioCard('2️⃣ Phase',[
-        {label:'Accumulation',value:'acc',sub:'General prep'},
-        {label:'Transmutation',value:'trans',sub:'Specific prep'},
-        {label:'Realisation',value:'real',sub:'Pre-comp'},
-        {label:'Maintenance',value:'main',sub:'Competition'}],'phase',()=>{
-          mount.innerHTML='';
-          mount.appendChild(radioCard('3️⃣ Track session?',[
-            {label:'Speed / Power',value:'speed'},
-            {label:'Strength only',value:'strength'},
-            {label:'Recovery / Tempo',value:'recovery'},
-            {label:'Endurance',value:'endurance'}],'track',()=>{
-              mount.innerHTML='';
-              const ch=[];
-              if(S.track==='speed') ch.push({label:'Fresh',value:'RFD'},{label:'Somewhat fresh',value:'RFDP'},{label:'Tired',value:'BPD'});
-              else if(S.track==='strength') ch.push({label:'Heavy',value:'ASD'},{label:'Moderate',value:'ASC'});
-              else if(S.track==='recovery') ch.push({label:'Recovery BB',value:'BB'});
-              else ch.push({label:'Maintain',value:'ASC'});
-              mount.appendChild(radioCard('4️⃣ How do you feel?',ch,'scheme',()=>{
-                const req=getReq(S.phase,S.scheme);
-                mount.innerHTML='';
-                mount.appendChild(exerciseCard(req,()=>{
-                  mount.innerHTML=workoutHTML();
-                }));
-              }));
-          }));
-      }));
-  }));
-}
+function reqTable(phase,sch){const z={static:0,regional:0,olympic:0,ballistic:0,rs:0,bb:0};switch(phase){case'acc':if(['ASD','ASC'].includes(sch)){z.static=1;z.regional=1;}if(sch==='BPD')z.olympic=1;if(sch==='BB')z.bb=1;break;case'trans':if(['ASD','ASC'].includes(sch))z.static=1;if(['RFDP','RFD'].includes(sch)){z.olympic=1;z.ballistic=1;}if(sch==='RS')z.rs=2;z.regional=1;break;case'real':if(['RFD','RFDP'].includes(sch)){z.olympic=1;z.ballistic=1;}if(sch==='ASC')z.static=1;break;case'main':if(sch==='BPD')z.olympic=1;if(sch==='RS'){z.ballistic=1;z.rs=1;}break;}return z;}
+function pres(cat,sch){if(cat==='regional')return'3×8‑10';if(cat==='ballistic')return'3×6 fast';if(cat==='rs')return SCHEMES.RS.sets+'×'+SCHEMES.RS.reps;return SCHEMES[sch].sets+'×'+SCHEMES[sch].reps+' @ '+SCHEMES[sch].pct;}
+function radio(title,opt,key,nxt){const c=document.createElement('div');c.className='card';c.innerHTML='<div class="title">'+title+'</div>';const box=document.createElement('div');box.className='options';c.appendChild(box);opt.forEach(o=>{box.insertAdjacentHTML('beforeend',`<label class="opt"><input type="radio" name="${key}" value="${o.v}"><span>${o.t}</span></label>`);});const b=document.createElement('button');b.className='next';b.textContent='Next';b.disabled=true;c.appendChild(b);c.addEventListener('change',()=>b.disabled=false);b.onclick=()=>{S[key]=c.querySelector('input:checked').value;nxt();};return c;}
+function picker(req,nxt){const c=document.createElement('div');c.className='card';c.innerHTML='<div class="title">5️⃣ Choose your lifts</div>';if(req.bb){c.insertAdjacentHTML('beforeend','<p>Select a Bodybuilding circuit</p>');Object.entries(BB_CIRCUITS).forEach(([n,l])=>{c.insertAdjacentHTML('beforeend',`<label class="opt"><input type="radio" name="bbc" value="${n}"><span>Circuit #${n}</span></label>`);});}
+['static','regional','olympic','ballistic','rs'].forEach(cat=>{if(!req[cat])return;c.insertAdjacentHTML('beforeend',`<div class="cat-head">${cat.toUpperCase()} <span class="req">(choose ${req[cat]})</span></div>`);const o=document.createElement('div');o.className='options';c.appendChild(o);LIFTS[cat].forEach(l=>{o.insertAdjacentHTML('beforeend',`<label class="opt"><input type="checkbox" data-cat="${cat}" value="${l}"><span><a href="#" target="_blank">${l}</a></span></label>`);});});const b=document.createElement('button');b.className='next';b.textContent='Finish';b.disabled=true;c.appendChild(b);c.addEventListener('change',()=>{let ok=true;if(req.bb)ok=!!c.querySelector('[name="bbc"]:checked');const cnt={};Object.keys(req).forEach(k=>cnt[k]=0);c.querySelectorAll('input[type="checkbox"]:checked').forEach(x=>cnt[x.dataset.cat]++);ok=ok&&Object.keys(req).every(k=>!req[k]||k==='bb'||cnt[k]===req[k]);b.disabled=!ok;});b.onclick=()=>{S.chosen={};if(req.bb){const n=c.querySelector('[name="bbc"]:checked').value;S.chosen.bb=BB_CIRCUITS[n];S.bbRounds=n==='4'?1:2;}c.querySelectorAll('input[type="checkbox"]:checked').forEach(x=>(S.chosen[x.dataset.cat]=S.chosen[x.dataset.cat]||[]).push(x.value));nxt();};return c;}
+function summary(){const sc=SCHEMES[S.scheme];let html='<div class="card"><h2 class="title">🏋️ Your Workout</h2><p><strong>Scheme:</strong> '+S.scheme+' → '+sc.sets+'×'+sc.reps+' @ '+sc.pct+'</p><ul>';Object.entries(S.chosen).forEach(([cat,list])=>list.forEach(l=>html+='<li>'+l+' — '+pres(cat,S.scheme)+'</li>'));html+='</ul>';if(S.chosen.bb)html+='<p><em>Complete '+S.bbRounds+' round(s) of chosen BB circuit.</em></p>';html+='<button class="next" onclick="start()">Start over</button></div>';app.innerHTML=html;}
+function start(){app.innerHTML='';app.appendChild(radio('1️⃣ Season?',[{t:'Off‑Season',v:'off'},{t:'Pre‑Season',v:'pre'},{t:'In‑Season',v:'in'}],'season',()=>{app.innerHTML='';app.appendChild(radio('2️⃣ Phase?',[{t:'Accumulation',v:'acc'},{t:'Transmutation',v:'trans'},{t:'Realisation',v:'real'},{t:'Maintenance',v:'main'}],'phase',()=>{app.innerHTML='';app.appendChild(radio('3️⃣ Track?',[{t:'Speed/Power',v:'speed'},{t:'Strength',v:'strength'},{t:'Recovery',v:'recovery'},{t:'Endurance',v:'endurance'}],'track',()=>{app.innerHTML='';let o=[];if(S.track==='speed')o=[{t:'Fresh',v:'RFD'},{t:'Somewhat fresh',v:'RFDP'},{t:'Tired',v:'BPD'}];else if(S.track==='strength')o=[{t:'Heavy',v:'ASD'},{t:'Moderate',v:'ASC'}];else if(S.track==='recovery')o=[{t:'Bodybuilding',v:'BB'}];else o=[{t:'Maintain',v:'ASC'}];app.appendChild(radio('4️⃣ How do you feel?',o,'scheme',()=>{const req=reqTable(S.phase,S.scheme);app.innerHTML='';app.appendChild(picker(req,summary));}));}));}));});}
 start();
 </script>
 </body>
