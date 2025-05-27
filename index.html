@@ -26,32 +26,164 @@ button.next:disabled{opacity:.5}
 <script>
 // ===== Arrays =====
 const BB_CIRCUITS={
- 1:["Rotational Step‑Ups (L-R)","Flys (use bench)","Lunges (L-R)","Lat Pulldown","Stooped Russian Twists w/stop at Center","V-Sits","Hanging Lateral Leg Lifts","Good Mornings","DB Alternating Toe Touches (L-R)","Twisting Sit-ups","Pullovers","Russian Twists (Hay Bales)"],
- 2:["Lunge w/Twist","Single-Arm Bent Over Row","Weighted Crunches","Straight-Leg Deadlift","Arm Curls","Seated Shoulder Press","Lat Pulldown","DB Alternating Toes Touches","Dips","Hanging Leg Lifts","Push-ups w/Feet up","Back Hypers","Pullups (bar)"],
- 3:["Russian Twists - Standing","Arm Curls","DB Lateral Flys","DB Alternating Toe Touches","Rotational Step-ups","Weighted Crunches","Inverted Row","Russian Twists w/lunge","Hanging Knee Raises","Single-Arm Bent Over Rows","Military Press","Straight Leg Deadlift","Weighted Back Hyper
-","Hanging L’s"],
- 4:["V-Sits","Hanging L's","Russian Twist - Overhead Twists","Seated Good Mornings","Seated DB Shoulder Press","Hanging Leg Lifts","Lat Pulldowns","Single-Arm Curls","Back Hyper w/Twist","Inverted Row","DB Alternating Toe Touch","Repeated Crossover Step Ups (L-R)","Weighted Crunches","Single-arm Bent Over Row","Military Press","Weighted Back Hyper","Toe Risers","Russian Twist Standing w/Bar","V-Sits","Hanging Lateral Knee Lifts"]
+ 1:["Rotational Step-Ups","Lunges","Lat Pulldown","Stooped Russian Twists","Good Mornings","DB Toe Touches"],
+ 2:["Pullovers","Russian Twists (Hay Bales)","Single-Arm Row","Weighted Crunches","Straight-Leg Deadlift","Arm Curls"],
+ 3:["Seated Shoulder Press","Dips","Push-ups (Feet Elevated)","Back Hypers","Pullups","Standing Russian Twist","Weighted Back Hyper","Hanging Ls"],
+ 4:["Inverted Row","Military Press","Weighted Back Hyper","Hanging Knee Raises","Overhead Twist","Toe Risers","Crossover Step-Ups","Face Pulls","DB Lateral Flys","Seated Good Morning","V-Sits","Hanging Leg Raise"]
 };
-const REGIONAL=["Leg Curls","Leg Extensions","Half Leg Curls","Half Leg Extensions","Single-leg Curls","Single-leg Extensions","Lunges","Lunge Walks","Backward Lunge Walks","Twisting Lunges","Twisting Lunge Walks","Step-ups","Crossover Steps-ups","Straight Leg Deadlift","Windmills (small plates)","Back Hypers","Back Hypers w/ Twist","Hyper-Ups","Hanging Knee-Ups","Hanging Knee-Ups","Hanging Lateral Knee Lifts","Hanging Leg Lifts","Hanging Lateral Leg Lifts","Russian Twists (standing)","Russian Twists w/ Stop (standing)","Stooped Russian Twists","Stooped Russian Twists","Stooped Russian Twists w/ Stop","Weighted Sit-ups","Weighted Sit-ups w/ Twist","Weighted V-ups","Weighted Crunches","Weighted Crunches w/ Twist (one hand)","Alternating Weighted V-ups","Behind-the-Neck Pull-Downs","Rows","Behind-the-Neck Press","Dips","Dumbbell Flys","Supine Pullover","Diagonal Supine Pullover"];
-const BALLISTIC=["Squat Jumps","Half Squat Jump","Lunge Jumps","Split Jumps","Step-up Jumps","Single-leg Rotational Jumps","Rep Jerks","Split Rep Jerks","Half Incline Press","Bench Press Throw","Med Ball Throws"];
-const OLYMPIC=["Clean","Clean and Jerk","Snatch","Clean Pull From Floor","Clean Pull From Knee","Clean Pull From Thigh","Hang Pull From Shin","Hang Pull From Knee","Snatch Grip Pull From Floor","Snatch Grip Pull From Shin","Snatch Grip Pull From Knee","Snatch Grip Pull From Thigh","Hang Clean From Shin","Hang Clean From Knee","Hang Clean From Thigh","Power Clean","Power Clean and Jerk","Power Snatch","Split Clean","Split Snatch","Dumbbell Clean","Dumbbell Snatch","Hang Power Clean From Shin","Hang Power Clean From Knee","Hang Power Clean From Thigh"];
-const STATIC=["Back Squat","Front Squat","Trap‑Bar Deadlift","Conventional Deadlift","Split Squat (heavy)","Bench Press","Incline Bench","Weighted Pull‑ups","Military Press","Weighted Dips"];
-const RS=["Continuous Hurdle Hops","Bounding Series","Single‑Leg Pogos","Overhead Back MB Heave"];
+const REGIONAL=["RDL","Hip Thrust","Step-Ups","DB Row","Lat Pull-Down","Nordic Curl"];
+const BALLISTIC=["Jump Squat","Trap-Bar Jump","Bench Press Throw","Overhead Med-Ball Throw","Split-Jerk Jump"];
+const OLYMPIC=["Power Clean","Hang Clean","Power Snatch","Mid-Thigh Clean Pull","Snatch Pull","Clean Pull","Snatch Pull","DB Snatch"];
+const STATIC=["Back Squat","Front Squat","Trap-Bar Deadlift","Conventional Deadlift","Split Squat (heavy)","Bench Press","Incline Bench","Weighted Pull-ups","Military Press","Weighted Dips"];
+const RS=["Continuous Hurdle Hops","Bounding Series","Single-Leg Pogos","Overhead Back MB Heave"];
 const LIFTS={static:STATIC,regional:REGIONAL,olympic:OLYMPIC,ballistic:BALLISTIC,rs:RS};
 
-const SCHEMES={RFD:{sets:"5‑9",reps:"1‑2",pct:"90‑100%",rest:"3‑5 min"},RFDP:{sets:"4‑9",reps:"2‑4",pct:"70‑85%",rest:"2‑3 min"},BPD:{sets:"4‑9",reps:"4‑5",pct:"50‑65%",rest:"2‑3 min"},ASD:{sets:"4‑8",reps:"1‑5",pct:"80‑100%",rest:"3‑5 min"},ASC:{sets:"3‑6",reps:"4‑8",pct:"60‑80%",rest:"2‑3 min"},BB:{sets:"Circuit",reps:"10‑12",pct:"-",rest:"60‑90 s"},RS:{sets:"3‑8",reps:"5‑12",pct:"BW‑50%",rest:"1‑2 min"}};
+const SCHEMES={
+ RFD:{sets:"5-9",reps:"1-2",pct:"90-100%",rest:"3-5 min"},
+ RFDP:{sets:"4-9",reps:"2-4",pct:"70-85%",rest:"2-3 min"},
+ BPD:{sets:"4-9",reps:"4-5",pct:"50-65%",rest:"2-3 min"},
+ ASD:{sets:"4-8",reps:"1-5",pct:"80-100%",rest:"3-5 min"},
+ ASC:{sets:"3-6",reps:"4-8",pct:"60-80%",rest:"2-3 min"},
+ BB:{sets:"Circuit",reps:"10-12",pct:"-",rest:"60-90 s"},
+ RS:{sets:"3-8",reps:"5-12",pct:"BW-50%",rest:"1-2 min"}
+};
 
 const S={};
 const app=document.getElementById('app');
 
-function reqTable(phase,sch){const z={static:0,regional:0,olympic:0,ballistic:0,rs:0,bb:0};switch(phase){case'acc':if(['ASD','ASC'].includes(sch)){z.static=1;z.regional=1;}if(sch==='BPD')z.olympic=1;if(sch==='BB')z.bb=1;break;case'trans':if(['ASD','ASC'].includes(sch))z.static=1;if(['RFDP','RFD'].includes(sch)){z.olympic=1;z.ballistic=1;}if(sch==='RS')z.rs=2;z.regional=1;break;case'real':if(['RFD','RFDP'].includes(sch)){z.olympic=1;z.ballistic=1;}if(sch==='ASC')z.static=1;break;case'main':if(sch==='BPD')z.olympic=1;if(sch==='RS'){z.ballistic=1;z.rs=1;}break;}return z;}
-function pres(cat,sch){if(cat==='regional')return'3×8‑10';if(cat==='ballistic')return'3×6 fast';if(cat==='rs')return SCHEMES.RS.sets+'×'+SCHEMES.RS.reps;return SCHEMES[sch].sets+'×'+SCHEMES[sch].reps+' @ '+SCHEMES[sch].pct;}
-function radio(title,opt,key,nxt){const c=document.createElement('div');c.className='card';c.innerHTML='<div class="title">'+title+'</div>';const box=document.createElement('div');box.className='options';c.appendChild(box);opt.forEach(o=>{box.insertAdjacentHTML('beforeend',`<label class="opt"><input type="radio" name="${key}" value="${o.v}"><span>${o.t}</span></label>`);});const b=document.createElement('button');b.className='next';b.textContent='Next';b.disabled=true;c.appendChild(b);c.addEventListener('change',()=>b.disabled=false);b.onclick=()=>{S[key]=c.querySelector('input:checked').value;nxt();};return c;}
-function picker(req,nxt){const c=document.createElement('div');c.className='card';c.innerHTML='<div class="title">5️⃣ Choose your lifts</div>';if(req.bb){c.insertAdjacentHTML('beforeend','<p>Select a Bodybuilding circuit</p>');Object.entries(BB_CIRCUITS).forEach(([n,l])=>{c.insertAdjacentHTML('beforeend',`<label class="opt"><input type="radio" name="bbc" value="${n}"><span>Circuit #${n}</span></label>`);});}
-['static','regional','olympic','ballistic','rs'].forEach(cat=>{if(!req[cat])return;c.insertAdjacentHTML('beforeend',`<div class="cat-head">${cat.toUpperCase()} <span class="req">(choose ${req[cat]})</span></div>`);const o=document.createElement('div');o.className='options';c.appendChild(o);LIFTS[cat].forEach(l=>{o.insertAdjacentHTML('beforeend',`<label class="opt"><input type="checkbox" data-cat="${cat}" value="${l}"><span><a href="#" target="_blank">${l}</a></span></label>`);});});const b=document.createElement('button');b.className='next';b.textContent='Finish';b.disabled=true;c.appendChild(b);c.addEventListener('change',()=>{let ok=true;if(req.bb)ok=!!c.querySelector('[name="bbc"]:checked');const cnt={};Object.keys(req).forEach(k=>cnt[k]=0);c.querySelectorAll('input[type="checkbox"]:checked').forEach(x=>cnt[x.dataset.cat]++);ok=ok&&Object.keys(req).every(k=>!req[k]||k==='bb'||cnt[k]===req[k]);b.disabled=!ok;});b.onclick=()=>{S.chosen={};if(req.bb){const n=c.querySelector('[name="bbc"]:checked').value;S.chosen.bb=BB_CIRCUITS[n];S.bbRounds=n==='4'?1:2;}c.querySelectorAll('input[type="checkbox"]:checked').forEach(x=>(S.chosen[x.dataset.cat]=S.chosen[x.dataset.cat]||[]).push(x.value));nxt();};return c;}
-function summary(){const sc=SCHEMES[S.scheme];let html='<div class="card"><h2 class="title">🏋️ Your Workout</h2><p><strong>Scheme:</strong> '+S.scheme+' → '+sc.sets+'×'+sc.reps+' @ '+sc.pct+'</p><ul>';Object.entries(S.chosen).forEach(([cat,list])=>list.forEach(l=>html+='<li>'+l+' — '+pres(cat,S.scheme)+'</li>'));html+='</ul>';if(S.chosen.bb)html+='<p><em>Complete '+S.bbRounds+' round(s) of chosen BB circuit.</em></p>';html+='<button class="next" onclick="start()">Start over</button></div>';app.innerHTML=html;}
-function start(){app.innerHTML='';app.appendChild(radio('1️⃣ Season?',[{t:'Off‑Season',v:'off'},{t:'Pre‑Season',v:'pre'},{t:'In‑Season',v:'in'}],'season',()=>{app.innerHTML='';app.appendChild(radio('2️⃣ Phase?',[{t:'Accumulation',v:'acc'},{t:'Transmutation',v:'trans'},{t:'Realisation',v:'real'},{t:'Maintenance',v:'main'}],'phase',()=>{app.innerHTML='';app.appendChild(radio('3️⃣ Track?',[{t:'Speed/Power',v:'speed'},{t:'Strength',v:'strength'},{t:'Recovery',v:'recovery'},{t:'Endurance',v:'endurance'}],'track',()=>{app.innerHTML='';let o=[];if(S.track==='speed')o=[{t:'Fresh',v:'RFD'},{t:'Somewhat fresh',v:'RFDP'},{t:'Tired',v:'BPD'}];else if(S.track==='strength')o=[{t:'Heavy',v:'ASD'},{t:'Moderate',v:'ASC'}];else if(S.track==='recovery')o=[{t:'Bodybuilding',v:'BB'}];else o=[{t:'Maintain',v:'ASC'}];app.appendChild(radio('4️⃣ How do you feel?',o,'scheme',()=>{const req=reqTable(S.phase,S.scheme);app.innerHTML='';app.appendChild(picker(req,summary));}));}));}));});}
-start();
+function reqTable(phase,sch){
+ const r={static:0,regional:0,olympic:0,ballistic:0,rs:0,bb:0};
+ switch(phase){
+  case 'acc':
+    if(['ASD','ASC'].includes(sch)){r.static=1;r.regional=1;}
+    if(sch==='BPD')r.olympic=1;
+    if(sch==='BB')r.bb=1;
+  break;
+  case 'trans':
+    if(['ASD','ASC'].includes(sch))r.static=1;
+    if(['RFDP','RFD'].includes(sch)){r.olympic=1;r.ballistic=1;}
+    if(sch==='RS')r.rs=2;
+    r.regional=1;
+  break;
+  case 'real':
+    if(['RFD','RFDP'].includes(sch)){r.olympic=1;r.ballistic=1;}
+    if(sch==='ASC')r.static=1;
+  break;
+  case 'main':
+    if(sch==='BPD')r.olympic=1;
+    if(sch==='RS'){r.ballistic=1;r.rs=1;}
+  break;
+ }
+ return r;
+}
+function pres(cat,sch){
+ if(cat==='regional')return '3x8-10';
+ if(cat==='ballistic')return '3x6 fast';
+ if(cat==='rs')return SCHEMES.RS.sets+'x'+SCHEMES.RS.reps;
+ return SCHEMES[sch].sets+'x'+SCHEMES[sch].reps+' @ '+SCHEMES[sch].pct;
+}
+function radio(title,opt,key,next){
+ const card=document.createElement('div');card.className='card';
+ card.innerHTML='<div class="title">'+title+'</div>';
+ const box=document.createElement('div');box.className='options';card.appendChild(box);
+ opt.forEach(o=>{
+  box.insertAdjacentHTML('beforeend',
+   `<label class="opt"><input type="radio" name="${key}" value="${o.v}"><span>${o.t}</span></label>`);
+ });
+ const btn=document.createElement('button');btn.className='next';btn.textContent='Next';btn.disabled=true;card.appendChild(btn);
+ card.addEventListener('change',()=>btn.disabled=false);
+ btn.onclick=()=>{S[key]=card.querySelector('input:checked').value;next();};
+ return card;
+}
+function picker(req,next){
+ const card=document.createElement('div');card.className='card';
+ card.innerHTML='<div class="title">5️⃣ Choose your lifts</div>';
+ if(req.bb){
+   card.insertAdjacentHTML('beforeend','<p>Select a Bodybuilding circuit</p>');
+   Object.entries(BB_CIRCUITS).forEach(([n,l])=>{
+     card.insertAdjacentHTML('beforeend',
+      `<label class="opt"><input type="radio" name="bbc" value="${n}"><span>Circuit #${n}</span></label>`);
+   });
+ }
+ ['static','regional','olympic','ballistic','rs'].forEach(cat=>{
+  if(!req[cat])return;
+  card.insertAdjacentHTML('beforeend',
+    `<div class="cat-head">${cat.toUpperCase()} <span class="req">(choose ${req[cat]})</span></div>`);
+  const box=document.createElement('div');box.className='options';card.appendChild(box);
+  LIFTS[cat].forEach(l=>{
+    box.insertAdjacentHTML('beforeend',
+     `<label class="opt"><input type="checkbox" data-cat="${cat}" value="${l}">
+       <span><a href="#" target="_blank">${l}</a></span></label>`);
+  });
+ });
+ const btn=document.createElement('button');btn.className='next';btn.textContent='Finish';btn.disabled=true;card.appendChild(btn);
+ card.addEventListener('change',()=>{
+   let ok=true;
+   if(req.bb) ok = !!card.querySelector('[name="bbc"]:checked');
+   const counts={};Object.keys(req).forEach(k=>counts[k]=0);
+   card.querySelectorAll('input[type="checkbox"]:checked').forEach(cb=>counts[cb.dataset.cat]++);
+   ok = ok && Object.keys(req).every(k=>!req[k]||k==='bb'||counts[k]===req[k]);
+   btn.disabled=!ok;
+ });
+ btn.onclick=()=>{
+   S.chosen={};
+   if(req.bb){
+     const n=card.querySelector('[name="bbc"]:checked').value;
+     S.chosen.bb = BB_CIRCUITS[n];
+     S.bbRounds = n==='4'?1:2;
+   }
+   card.querySelectorAll('input[type="checkbox"]:checked').forEach(cb=>{
+     const cat=cb.dataset.cat;
+     (S.chosen[cat]=S.chosen[cat]||[]).push(cb.value);
+   });
+   next();
+ };
+ return card;
+}
+function summary(){
+ const sc=SCHEMES[S.scheme];
+ let html='<div class="card"><h2 class="title">🏋️ Your Workout</h2>';
+ html+='<p><strong>Scheme:</strong> '+S.scheme+' → '+sc.sets+'x'+sc.reps+' @ '+sc.pct+'</p><ul>';
+ Object.entries(S.chosen).forEach(([cat,list])=>{
+   list.forEach(l=>{
+     html+='<li>'+l+' — '+pres(cat,S.scheme)+'</li>';
+   });
+ });
+ html+='</ul>';
+ if(S.chosen.bb) html+='<p><em>Complete '+S.bbRounds+' round(s) of chosen BB circuit.</em></p>';
+ html+='<button class="next" onclick="start()">Start over</button></div>';
+ app.innerHTML=html;
+}
+function start(){
+ app.innerHTML='';
+ app.appendChild(radio('1️⃣ Season?',[
+   {t:'Off-Season',v:'off'},{t:'Pre-Season',v:'pre'},{t:'In-Season',v:'in'}
+ ],'season',()=>{
+   app.innerHTML='';
+   app.appendChild(radio('2️⃣ Phase?',[
+     {t:'Accumulation',v:'acc'},{t:'Transmutation',v:'trans'},
+     {t:'Realisation',v:'real'},{t:'Maintenance',v:'main'}
+   ],'phase',()=>{
+     app.innerHTML='';
+     app.appendChild(radio('3️⃣ Track?',[
+       {t:'Speed/Power',v:'speed'},{t:'Strength',v:'strength'},
+       {t:'Recovery',v:'recovery'},{t:'Endurance',v:'endurance'}
+     ],'track',()=>{
+       app.innerHTML='';
+       let ops=[];
+       if(S.track==='speed') ops=[{t:'Fresh',v:'RFD'},{t:'Somewhat fresh',v:'RFDP'},{t:'Tired',v:'BPD'}];
+       else if(S.track==='strength') ops=[{t:'Heavy',v:'ASD'},{t:'Moderate',v:'ASC'}];
+       else if(S.track==='recovery') ops=[{t:'Bodybuilding',v:'BB'}];
+       else ops=[{t:'Maintain',v:'ASC'}];
+       app.appendChild(radio('4️⃣ How do you feel?',ops,'scheme',()=>{
+         const req=reqTable(S.phase,S.scheme);app.innerHTML='';
+         app.appendChild(picker(req,summary));
+       }));
+     }));
+   }));
+ }));
+}
+document.addEventListener('DOMContentLoaded',start);
 </script>
 </body>
 </html>
