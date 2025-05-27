@@ -31,7 +31,7 @@
  3:["Russian Twists - Standing","Arm Curls","DB Lateral Flys","DB Alternating Toe Touches","Rotational Step-ups","Weighted Crunches","Inverted Row","Russian Twists w/lunge","Hanging Knee Raises","Single-Arm Bent Over Rows","Military Press","Straight Leg Deadlift","Weighted Back Hyper
 ","Hanging L’s"],
  4:["V-Sits","Hanging L's","Russian Twist - Overhead Twists","Seated Good Mornings","Seated DB Shoulder Press","Hanging Leg Lifts","Lat Pulldowns","Single-Arm Curls","Back Hyper w/Twist","Inverted Row","DB Alternating Toe Touch","Repeated Crossover Step Ups (L-R)","Weighted Crunches","Single-arm Bent Over Row","Military Press","Weighted Back Hyper","Toe Risers","Russian Twist Standing w/Bar","V-Sits","Hanging Lateral Knee Lifts"]
-};
+    };
 const REGIONAL=["Leg Curls","Leg Extensions","Half Leg Curls","Half Leg Extensions","Single-leg Curls","Single-leg Extensions","Lunges","Lunge Walks","Backward Lunge Walks","Twisting Lunges","Twisting Lunge Walks","Step-ups","Crossover Steps-ups","Straight Leg Deadlift","Windmills (small plates)","Back Hypers","Back Hypers w/ Twist","Hyper-Ups","Hanging Knee-Ups","Hanging Knee-Ups","Hanging Lateral Knee Lifts","Hanging Leg Lifts","Hanging Lateral Leg Lifts","Russian Twists (standing)","Russian Twists w/ Stop (standing)","Stooped Russian Twists","Stooped Russian Twists","Stooped Russian Twists w/ Stop","Weighted Sit-ups","Weighted Sit-ups w/ Twist","Weighted V-ups","Weighted Crunches","Weighted Crunches w/ Twist (one hand)","Alternating Weighted V-ups","Behind-the-Neck Pull-Downs","Rows","Behind-the-Neck Press","Dips","Dumbbell Flys","Supine Pullover","Diagonal Supine Pullover"];
 const BALLISTIC=["Squat Jumps","Half Squat Jump","Lunge Jumps","Split Jumps","Step-up Jumps","Single-leg Rotational Jumps","Rep Jerks","Split Rep Jerks","Half Incline Press","Bench Press Throw","Med Ball Throws"];
 const OLYMPIC=["Clean","Clean and Jerk","Snatch","Clean Pull From Floor","Clean Pull From Knee","Clean Pull From Thigh","Hang Pull From Shin","Hang Pull From Knee","Snatch Grip Pull From Floor","Snatch Grip Pull From Shin","Snatch Grip Pull From Knee","Snatch Grip Pull From Thigh","Hang Clean From Shin","Hang Clean From Knee","Hang Clean From Thigh","Power Clean","Power Clean and Jerk","Power Snatch","Split Clean","Split Snatch","Dumbbell Clean","Dumbbell Snatch","Hang Power Clean From Shin","Hang Power Clean From Knee","Hang Power Clean From Thigh"];
@@ -155,7 +155,7 @@ const LIFTS={static:STATIC,regional:REGIONAL,olympic:OLYMPIC,ballistic:BALLISTIC
     function start() {
       app.innerHTML = "";
       app.appendChild(radio("1️⃣ Season?", [
-        {t:"Off-Season",v:" (Summer/break)"}, {t:"Pre-Season (Fall / early‑winter)",v:"pre"}, {t:"In-Season (competition)",v:"in"}
+        {t:"Off-Season (Summer / break)",v:"off"}, {t:"Pre-Season (Fall / early‑winter)",v:"pre"}, {t:"In-Season (competition)",v:"in"}
       ], "season", () => {
         app.innerHTML = "";
         app.appendChild(radio("2️⃣ Phase?", [
@@ -165,7 +165,7 @@ const LIFTS={static:STATIC,regional:REGIONAL,olympic:OLYMPIC,ballistic:BALLISTIC
           app.innerHTML = "";
           app.appendChild(radio("3️⃣ Track?", [
             {t:"Speed / Power (sprinting, jumps, hard throws)",v:"speed"}, {t:"Strength / No Sprints",v:"strength"},
-            {t:"Recovery / Tempo",v:"recovery"}, {t:"Endurance/Lactate",v:"endurance"}
+            {t:"Recovery / Tempo",v:"recovery"}, {t:"Endurance / Lactate",v:"endurance"}
           ], "track", () => {
             app.innerHTML = "";
             let opts = [];
