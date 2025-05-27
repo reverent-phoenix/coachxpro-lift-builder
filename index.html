@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CoachXPro Lift Builder™</title>
+<style>
+  :root {
+    --brand-red: #ff0000;
+    --brand-black: #000000;
+    --bg: #ffffff;
+    --text: #111111;
+    --gray: #f5f5f5;
+  }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+      Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 2px solid var(--gray);
+  }
+  header img {
+    height: 40px;
+    margin-right: 0.75rem;
+  }
+  h1 {
+    font-size: 1.25rem;
+    margin: 0;
+    color: var(--brand-red);
+  }
+  main {
+    flex: 1;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 1rem;
+  }
+  .card {
+    background: var(--gray);
+    border-radius: 1rem;
+    padding: 1rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  }
+  .step-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  label.option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border: 2px solid transparent;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    background: #ffffff;
+    transition: border 0.2s ease;
+  }
+  input[type="radio"]:checked + span {
+    font-weight: 600;
+    color: var(--brand-red);
+  }
+  input[type="radio"]:checked + span + span {
+    color: var(--brand-red);
+  }
+  label.option:hover {
+    border-color: var(--brand-red);
+  }
+  label.option input {
+    accent-color: var(--brand-red);
+  }
+  button.next {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--brand-red);
+    color: #fff;
+    font-weight: 600;
+    border: none;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: opacity 0.2s ease;
+  }
+  button.next:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  #result {
+    white-space: pre-wrap;
+    font-family: monospace;
+    line-height: 1.4;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <!-- Replace src with your transparent logo file path if desired -->
+    <img src="https://dummyimage.com/160x40/000/fff&text=CoachXPro" alt="CoachXPro logo" />
+    <h1>Lift Builder™</h1>
+  </header>
+  <main>
+    <!-- Step Cards will be injected here -->
+  </main>
+
+<script>
+/* ----------------- Data ------------------ */
+const lifts = {
+  olympic: [
+    "Power Clean",
+    "Hang Clean",
+    "Clean Pulls",
+    "Snatch",
+    "DB Snatch",
+  ],
+  ballistic: [
+    "Jump Squats",
+    "Med Ball Overhead Throws",
+    "Bench Press Throw",
+    "Lunge Jumps",
+  ],
+  static: [
+    "Back Squat",
+    "Front Squat",
+    "Deadlift",
+    "Bench Press",
+    "RDL",
+  ],
+  bb: [
+    "Step‑Ups",
+    "Lunges",
+    "DB Rows",
+    "Leg Curls",
+    "Plank Core Circuit",
+  ],
+};
+
+const schemes = {
+  RFD: { sets: "5‑9", reps: "1‑2", percent: "90‑100%", rest: "3‑5 min" },
+  RFDP: { sets: "4‑9", reps: "2‑4", percent: "70‑85%", rest: "2‑3 min" },
+  BPD: { sets: "4‑9", reps: "4‑5", percent: "50‑65%", rest: "2‑3 min" },
+  ASD: { sets: "4‑8", reps: "1‑5", percent: "80‑100%", rest: "3‑5 min" },
+  ASC: { sets: "3‑6", reps: "4‑8", percent: "60‑80%", rest: "2‑3 min" },
+  BB: { sets: "Circuit", reps: "10‑12", percent: "Moderate", rest: "60‑90 s" },
+  RS: { sets: "3‑8", reps: "5‑12", percent: "BW‑50%", rest: "1‑2 min" },
+};
+
+/* ------------- State -------------- */
+const state = {
+  season: null,
+  phase: null,
+  track: null,
+  readiness: null,
+  scheme: null,
+};
+
+/* ------------ Helpers ------------- */
+function createCard(title, options, stepKey, nextCallback) {
+  const card = document.createElement("div");
+  card.className = "card";
+  const h = document.createElement("div");
+  h.className = "step-title";
+  h.textContent = title;
+  card.appendChild(h);
+  const optWrap = document.createElement("div");
+  optWrap.className = "options";
+  card.appendChild(optWrap);
+  options.forEach((opt) => {
+    const id = stepKey + "-" + opt.value;
+    const label = document.createElement("label");
+    label.className = "option";
+    label.setAttribute("for", id);
+    const input = document.createElement("input");
+    input.type = "radio";
+    input.name = stepKey;
+    input.id = id;
+    input.value = opt.value;
+    input.addEventListener("change", () => {
+      btn.disabled = false;
+    });
+    const span = document.createElement("span");
+    span.textContent = opt.label;
+    const desc = document.createElement("span");
+    desc.style.fontSize = "0.8rem";
+    desc.style.opacity = 0.7;
+    desc.textContent = opt.sub || "";
+    label.appendChild(input);
+    label.appendChild(span);
+    if (opt.sub) label.appendChild(desc);
+    optWrap.appendChild(label);
+  });
+  const btn = document.createElement("button");
+  btn.className = "next";
+  btn.textContent = "Next";
+  btn.disabled = true;
+  btn.addEventListener("click", () => {
+    const selected = card.querySelector("input:checked");
+    if (!selected) return;
+    state[stepKey] = selected.value;
+    nextCallback();
+  });
+  card.appendChild(btn);
+  return card;
+}
+
+function pickRandom(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function buildWorkout() {
+  // Determine scheme based on state (simplified logic)
+  const { track, readiness } = state;
+  let schemeKey;
+  if (track === "speed") {
+    schemeKey = readiness; // RFD, RFDP, BPD chosen earlier
+  } else if (track === "strength") {
+    schemeKey = readiness; // ASD or ASC
+  } else if (track === "recovery") {
+    schemeKey = "BB";
+  } else if (track === "endurance") {
+    schemeKey = "ASC";
+  }
+  state.scheme = schemeKey;
+  const scheme = schemes[schemeKey];
+
+  // Build lift menu
+  const workout = [];
+  if (["RFD", "RFDP", "BPD"].includes(schemeKey)) {
+    workout.push(`${pickRandom(lifts.olympic)} – ${scheme.sets} × ${scheme.reps} @ ${scheme.percent}`);
+    workout.push(`${pickRandom(lifts.ballistic)} – 3 × 6 (fast)`);
+    workout.push(`${pickRandom(lifts.static)} – 3 × 5 @ 70%`);
+  } else if (["ASD", "ASC"].includes(schemeKey)) {
+    workout.push(`${pickRandom(lifts.static)} – ${scheme.sets} × ${scheme.reps} @ ${scheme.percent}`);
+    workout.push(`${pickRandom(lifts.olympic)} – 4 × 3 @ 75%`);
+  } else if (schemeKey === "BB") {
+    workout.push(`Circuit: ${pickRandom(lifts.bb)}, ${pickRandom(lifts.bb)}, ${pickRandom(lifts.bb)} – 2 rounds`);
+  } else if (schemeKey === "RS") {
+    workout.push(`${pickRandom(lifts.ballistic)} – ${scheme.sets} × ${scheme.reps}`);
+    workout.push(`${pickRandom(lifts.olympic)} – 3 × 3 @ 60%`);
+  }
+
+  return {
+    schemeKey,
+    scheme,
+    workout,
+  };
+}
+
+/* ---------- Flow Control --------- */
+const main = document.querySelector("main");
+
+function stepSeason() {
+  main.innerHTML = "";
+  const card = createCard(
+    "1️⃣ What season are you in?",
+    [
+      { label: "Off‑Season", sub: "Summer / long break", value: "off" },
+      { label: "Pre‑Season", sub: "Fall / early winter", value: "pre" },
+      { label: "In‑Season", sub: "Indoor / outdoor meets", value: "in" },
+    ],
+    "season",
+    stepPhase
+  );
+  main.appendChild(card);
+}
+
+function stepPhase() {
+  main.innerHTML = "";
+  const card = createCard(
+    "2️⃣ Pick your block (phase)",
+    [
+      { label: "Accumulation", sub: "General Prep", value: "acc" },
+      { label: "Transmutation", sub: "Specific Prep", value: "trans" },
+      { label: "Realization", sub: "Pre‑Comp", value: "real" },
+      { label: "Maintenance", sub: "In‑Season", value: "main" },
+    ],
+    "phase",
+    stepTrack
+  );
+  main.appendChild(card);
+}
+
+function stepTrack() {
+  main.innerHTML = "";
+  const card = createCard(
+    "3️⃣ What did you do on the track today?",
+    [
+      { label: "Speed / Power (sprinting, jumps)", value: "speed" },
+      { label: "Strength / No Sprints", value: "strength" },
+      { label: "Recovery / Tempo", value: "recovery" },
+      { label: "Endurance / Lactate", value: "endurance" },
+    ],
+    "track",
+    stepReadiness
+  );
+  main.appendChild(card);
+}
+
+function stepReadiness() {
+  main.innerHTML = "";
+  const choices = [];
+  if (state.track === "speed") {
+    choices.push(
+      { label: "Fresh & explosive", value: "RFD" },
+      { label: "Kinda fresh", value: "RFDP" },
+      { label: "Tired", value: "BPD" }
+    );
+  } else if (state.track === "strength") {
+    choices.push(
+      { label: "Going heavy", value: "ASD" },
+      { label: "Moderate strength", value: "ASC" }
+    );
+  } else if (state.track === "recovery") {
+    choices.push({ label: "Just need blood flow / recovery", value: "BB" });
+  } else {
+    choices.push({ label: "Maintain & support", value: "ASC" });
+  }
+  const card = createCard("4️⃣ How do you feel today?", choices, "readiness", stepResult);
+  main.appendChild(card);
+}
+
+function stepResult() {
+  const result = buildWorkout();
+  main.innerHTML = "";
+  const card = document.createElement("div");
+  card.className = "card";
+  const title = document.createElement("h2");
+  title.textContent = "🏋️ Your Workout";
+  card.appendChild(title);
+  const schemeInfo = document.createElement("p");
+  schemeInfo.innerHTML = `<strong>Scheme:</strong> ${state.scheme} – ${result.scheme.sets} sets × ${result.scheme.reps} reps @ ${result.scheme.percent} (${result.scheme.rest} rest)`;
+  card.appendChild(schemeInfo);
+  const list = document.createElement("ul");
+  result.workout.forEach((item) => {
+    const li = document.createElement("li");
+    li.textContent = item;
+    list.appendChild(li);
+  });
+  card.appendChild(list);
+  const restart = document.createElement("button");
+  restart.className = "next";
+  restart.textContent = "Start Over";
+  restart.addEventListener("click", () => {
+    Object.keys(state).forEach((k) => (state[k] = null));
+    stepSeason();
+  });
+  card.appendChild(restart);
+  main.appendChild(card);
+}
+
+stepSeason();
+</script>
+</body>
+</html>
