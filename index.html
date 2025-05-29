@@ -20,10 +20,57 @@
     button.next:disabled { opacity:0.5; }
     .cat-head { margin:0.75rem 0 0.25rem; font-weight:600; }
     a { text-decoration:none; color:inherit; }
+
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 1000;
+}
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+/* Modal window */
+.modal {
+  background: #fff;
+  border-radius: 0.5rem;
+  max-width: 400px;
+  width: 90%;
+  padding: 1rem 1.5rem;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.modal-close {
+  position: absolute;
+  top: 0.5rem; right: 0.75rem;
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
   </style>
+
 </head>
 <body>
   <div id="app"></div>
+
+<div id="modalOverlay" class="modal-overlay">
+  <div class="modal">
+    <button id="modalClose" class="modal-close">&times;</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+
   <script>
     // --- Data Pools ---
     const BB_CIRCUITS = {
@@ -32,22 +79,118 @@
       3: ["Russian Twists – Standing","Arm Curls","DB Lateral Flys","DB Alternating Toe Touches","Rotational Step-Ups","Weighted Crunches","Inverted Row","Russian Twist Lunge","Hanging Knee Raises","Single-Arm Row","Military Press","Straight-Leg Deadlift","Weighted Back Hyper","Hanging L's"],
       4: ["V-Sits","Hanging L's","Russian Twist - Overhead Twists","Seated Good Mornings","Seated DB Shoulder Press","Hanging Leg Lifts","Lat Pulldowns","Single-Arm Curls","Back Hyper w/Twist","Inverted Row","DB Alternating Toe Touch","Repeated Crossover Step Ups (L-R)","Weighted Crunches","Single-arm Bent Over Row","Military Press","Weighted Back Hyper","Toe Risers","Russian Twist Standing w/Bar","V-Sits","Hanging Lateral Knee Lifts"]
     };
-    const OLYMPIC   = ["Power Clean","Hang Clean","Power Snatch","Mid‑Thigh Pull","Snatch Pull","Clean Pull","DB Snatch"];
-    const BALLISTIC = ["Jump Squat","Trap‑Bar Jump","Bench Press Throw","Med‑Ball Throw","Split‑Jerk Jump"];
-    const STATIC    = ["Back Squat","Front Squat","Trap‑Bar Deadlift","Conventional Deadlift","Split Squat","Bench Press","Incline Bench","Weighted Pull‑ups","Military Press","Weighted Dips"];
-    const REGIONAL  = ["RDL","Hip Thrust","Step‑Ups","DB Row","Lat Pull‑Down","Nordic Curl"];
+    // Static (multi‑joint strength) lifts
+const STATIC = [
+  "Back Squat",
+  "Front Squat",
+  "Trap‑Bar Deadlift",
+  "Conventional Deadlift",
+  "Split Squat",
+  "Bench Press",
+  "Incline Bench",
+  "Weighted Pull‑ups",
+  "Military Press",
+  "Weighted Dips"
+];
+
+// Regional/Assistance (single‑joint, core, corrective) lifts
+const REGIONAL = [
+  "Leg curls",
+  "Leg extensions",
+  "Half leg curls",
+  "Half leg extensions",
+  "Single leg curls",
+  "Single leg extensions",
+  "Lunges",
+  "Lunge walks",
+  "Backward lunge walks",
+  "Twisting lunges",
+  "Twisting lunge walks",
+  "Step ups",
+  "Crossover step ups",
+  "Straight leg deadlift",
+  "Windmills (small plates)",
+  "Back hypers",
+  "Back hypers w/twist",
+  "Hyper ups",
+  "Hanging knee ups",
+  "Hanging leg lifts",
+  "Hanging lateral knee lifts",
+  "Russian twists (standing)",
+  "Russian twists w/stop (standing)",
+  "Stooped Russian twists",
+  "Stooped Russian twists w/stop",
+  "Weighted situps",
+  "Weighted situps w/twist",
+  "Weighted v-ups",
+  "Weighted crunches",
+  "Weighted crunches w/twist (one hand)",
+  "Alternating weighted v-ups",
+  "Behind the neck pull‑downs",
+  "Lat pulldown",
+  "Rows",
+  "Behind the neck press",
+  "Dips",
+  "DB flies",
+  "Supine pullover",
+  "Diagonal supine pullover"
+];
+
+// Ballistic (speed‑strength throws, jumps, med‑ball work)
+const BALLISTIC = [
+  "Squat jumps",
+  "Half squat jump",
+  "Lunge jumps",
+  "Split jumps",
+  "Step up jumps",
+  "Single‑leg rotational jumps",
+  "Rep jerks",
+  "Split rep jerks",
+  "Half incline press",
+  "Bench press throw",
+  "Med ball throws"
+];
+
+// Olympic‑type (full lifts & long‑pull variants)
+const OLYMPIC = [
+  "Clean",
+  "Clean and jerk",
+  "Snatch",
+  "Clean Pull from Floor",
+  "Clean Pulls from Knee",
+  "Clean Pulls from Thigh",
+  "Hang Pull from Shin",
+  "Hang Pull from Knee",
+  "Snatch Grip Pull from Floor",
+  "Snatch Grip Pull from Shin",
+  "Snatch Grip Pull from Knee",
+  "Snatch Grip Pulls from Thigh",
+  "Hang Clean from Shin",
+  "Hang Clean from Knee",
+  "Hang Clean from Thigh",
+  "Power clean and jerk",
+  "Power snatch",
+  "Split clean",
+  "Split snatch",
+  "Dumbbell clean",
+  "Dumbbell snatch",
+  "Hang Power Clean from Shin",
+  "Hang Power Clean from Knee",
+  "Hang Power Clean from Thigh"
+];
+
     const LIFTS     = { olympic:OLYMPIC, ballistic:BALLISTIC, static:STATIC, regional:REGIONAL };
 
-    // --- Schemes (added RS for realization regional) ---
+    // --- Schemes (with RS for regional in real) ---
     const SCHEMES = {
-      BPD: { sets:"4-9", reps:"4-5", pct:"50-65%", rest:"2-3 min" },
+      BPD:  { sets:"4-9", reps:"4-5", pct:"50-65%", rest:"2-3 min" },
       RFDP: { sets:"4-9", reps:"2-4", pct:"70-85%", rest:"2-3 min" },
-      RFD: { sets:"5-9", reps:"1-2", pct:"90-100%",rest:"Complete" },
-      ASD: { sets:"4-8", reps:"1-5", pct:"80-100%",rest:"Complete" },
-      ASC: { sets:"3-6", reps:"4-8", pct:"60-80%", rest:"2-3 min" },
-      ASP: { sets:"3-6", reps:"5-8",pct:"60-80%", rest:"2-3 min" },
-      BB: { reps:"10-12", rest:"60-90 s" },
-      RS: { sets:"3-8", reps:"5-12", pct:"10-50% BW", rest:"Sufficient to ensure quality w/ slight lactate accumulation" }
+      RFD:  { sets:"5-9", reps:"1-2", pct:"90-100%",rest:"complete" },
+      ASD:  { sets:"4-8", reps:"1-5", pct:"80-100%",rest:"complete" },
+      ASC:  { sets:"3-6", reps:"4-8", pct:"60-80%", rest:"2-3 min" },
+      ASP:  { sets:"3-6", reps:"5-8",pct:"60-80%", rest:"2-3 min" },
+      BB:   { reps:"10-12", rest:"60-90 s" },
+      RS:   { sets:"3-8", reps:"5-12", pct:"10-50% BW", rest:"sufficient enough to ensure work quality, but slight lactate accumulation" }
     };
 
     // --- Per‑phase counts ---
@@ -55,7 +198,7 @@
       acc:   { olympic:1, ballistic:1, static:2, regional:2 },
       trans: { olympic:1, ballistic:1, static:2, regional:1 },
       real:  { olympic:1, ballistic:1, static:1, regional:1 },
-      main:  { olympic:1, ballistic:1, static:1, regional:0 }
+      main:  { olympic:1, ballistic:1, static:0, regional:1 }
     };
 
     // --- Microcycle & Info ---
@@ -83,34 +226,43 @@
       load_management: "Load Mgmt: adjust around competition load."
     };
 
-    let S={}, app=document.getElementById("app");
+    let S = {}, app = document.getElementById("app");
 
     function createRadio(title, opts, key, cb){
-      const c=document.createElement("div");c.className="card";
+      const c=document.createElement("div"); c.className="card";
       c.innerHTML=`<div class="title">${title}</div>`;
-      const box=document.createElement("div");box.className="options";c.appendChild(box);
-      opts.forEach(o=>box.insertAdjacentHTML("beforeend",
-        `<label class="opt"><input type="radio" name="${key}" value="${o.v}"><span>${o.t}</span></label>`));
-      const btn=document.createElement("button");btn.className="next";
-      btn.textContent="Next";btn.disabled=true;c.appendChild(btn);
+      const box=document.createElement("div"); box.className="options"; c.appendChild(box);
+      opts.forEach(o=>{
+        const sub = o.desc ? `<span class="desc">${o.desc}</span>` : "";
+        box.insertAdjacentHTML("beforeend",
+          `<label class="opt">
+             <input type="radio" name="${key}" value="${o.v}">
+             <span>${o.t}</span>
+             ${sub}
+           </label>`);
+      });
+      const btn=document.createElement("button"); btn.className="next";
+      btn.textContent="Next"; btn.disabled=true; c.appendChild(btn);
       c.addEventListener("change",()=>btn.disabled=false);
       btn.onclick=()=>{ S[key]=c.querySelector("input:checked").value; cb(); };
       return c;
     }
 
+    // Step 1
     function stepMacro(){
-      app.innerHTML=""; 
+      app.innerHTML="";
       app.appendChild(createRadio("1️⃣ What season are you in right now?",
         [
           {t:"Off‑Season / Accumulation (Jun–Aug)",v:"acc"},
           {t:"Pre‑Season / Transmutation (Sep–Nov)",v:"trans"},
           {t:"Indoor Season / Realization (Dec–Feb)",v:"real"},
-          {t:"Outdoor Season / Maintenance (Mar–May)",v:"main"} 
+          {t:"Outdoor Season / Maintenance (Mar–May)",v:"main"}
         ],
         "phase", stepMicro
       ));
     }
 
+    // Step 2
     function stepMicro(){
       app.innerHTML="";
       const opts=microMap[S.phase];
@@ -120,25 +272,35 @@
         const lab=inp.closest("label");
         const info=document.createElement("span");
         info.className="info-icon"; info.textContent="ℹ️";
-        info.onclick=()=>alert(microInfo[o.v]||"");
+        info.onclick = ()=> showModal(microInfo[o.v]||"");
         lab.appendChild(info);
       });
       app.appendChild(card);
     }
 
+    // Step 3
     function stepTrack(){
-      app.innerHTML="";
-      app.appendChild(createRadio("3️⃣ What did/will you do on the track today?",
+      app.innerHTML = "";
+      app.appendChild(createRadio("3️⃣ What type of track session?",
         [
-          {t:"Speed / Power",v:"speed"},
-          {t:"Strength / No Sprints",v:"strength"},
-          {t:"Recovery / Tempo",v:"recovery"},
-          {t:"Endurance / Lactate",v:"endurance"}
+          {t:"Speed / Power",v:"speed",desc:"Accel, sprints, jumps, throws"},
+          {t:"Glycolytic",v:"glyco",desc:"Intensive tempo, SE, lactate work"},
+          {t:"Aerobic",v:"aero",desc:"Tempo runs, continuous running"},
+          {t:"Recovery",v:"recovery",desc:"Med‑ball, mobility, easy runs"}
         ],
-        "track", stepRecovery
+        "track",
+        ()=> {
+          if (S.track==="aero" || S.track==="recovery") {
+            recoveryCircuitChoice();
+          } else {
+            stepRecovery();
+          }
+        }
       ));
     }
 
+
+    // Step 4
     function stepRecovery(){
       app.innerHTML="";
       app.appendChild(createRadio("4️⃣ How do you feel?",
@@ -151,6 +313,42 @@
       ));
     }
 
+    // --- NEW: Recovery/Aerobic Circuit Choice ---
+    function recoveryCircuitChoice(){
+      app.innerHTML = "";
+      const card = document.createElement("div"); card.className="card";
+      card.innerHTML = `<div class="title">🏋️ Recovery/Aerobic Session</div>`;
+      const box = document.createElement("div"); box.className="options"; card.appendChild(box);
+      // Option A: Pre‑built
+      box.insertAdjacentHTML("beforeend",
+        `<label class="opt">
+           <input type="radio" name="recChoice" value="prebuilt">
+           <span>Use Pre‑Built Bodybuilding Circuit</span>
+           <span class="desc">Pick one circuit; complete 1 rounds</span>
+         </label>`);
+      // Option B: Custom
+      box.insertAdjacentHTML("beforeend",
+        `<label class="opt">
+           <input type="radio" name="recChoice" value="custom">
+           <span>Build Your Own Circuit</span>
+           <span class="desc">Select 4–6 regional lifts; complete 2 rounds</span>
+         </label>`);
+      const btn = document.createElement("button"); btn.className="next";
+      btn.textContent="Next"; btn.disabled=true; card.appendChild(btn);
+      card.addEventListener("change",()=> btn.disabled = !card.querySelector("input:checked"));
+      btn.onclick = ()=>{
+        const choice = card.querySelector("input[name=recChoice]:checked").value;
+        if(choice==="prebuilt") {
+          S.forceBB = true;
+          bodybuildingPicker();
+        } else {
+          customRegionalPicker();
+        }
+      };
+      app.appendChild(card);
+    }
+
+    // Step 5
     function stepWorkoutChoice(){
       if(S.recovery==="sore"){
         S.forceBB=true; return bodybuildingPicker();
@@ -168,16 +366,17 @@
       picker();
     }
 
+    // BB only
     function bodybuildingPicker(){
       app.innerHTML="";
-      const c=document.createElement("div");c.className="card";
+      const c=document.createElement("div"); c.className="card";
       c.innerHTML=`<div class="title">🏋️ Bodybuilding Circuit</div><p>10–12 reps; rest 60–90 s</p>`;
       Object.entries(BB_CIRCUITS).forEach(([n,a])=>{
         c.insertAdjacentHTML("beforeend",
           `<label class="opt"><input type="radio" name="bbc" value="${n}"><span>Circuit #${n} (${a.length})</span></label>`);
       });
-      const btn=document.createElement("button");btn.className="next";
-      btn.textContent="Finish";btn.disabled=true;c.appendChild(btn);
+      const btn=document.createElement("button"); btn.className="next";
+      btn.textContent="Finish"; btn.disabled=true; c.appendChild(btn);
       c.addEventListener("change",()=>btn.disabled=!c.querySelector("input:checked"));
       btn.onclick=()=>{
         const n=c.querySelector("input:checked").value;
@@ -186,26 +385,69 @@
       app.appendChild(c);
     }
 
+    // --- NEW: Custom Regional Builder ---
+    function customRegionalPicker(){
+      app.innerHTML = "";
+      const c = document.createElement("div"); c.className="card";
+      c.innerHTML = `<div class="title">🛠 Build Your Own Circuit</div>
+                     <span class="desc">Choose 4–6 regional exercises; complete 2 rounds</span>`;
+      const box = document.createElement("div"); box.className="options"; c.appendChild(box);
+      // render all regionals
+      REGIONAL.forEach(ex=>{
+        box.insertAdjacentHTML("beforeend",
+          `<label class="opt">
+             <input type="checkbox" data-cat="regional" value="${ex}">
+             <span>${ex}</span>
+           </label>`);
+      });
+      const btn = document.createElement("button"); btn.className="next";
+      btn.textContent="Finish"; btn.disabled=true; c.appendChild(btn);
+      c.addEventListener("change",()=>{
+        const count = c.querySelectorAll("input[type=checkbox]:checked").length;
+        btn.disabled = !(count>=4 && count<=6);
+      });
+      btn.onclick = ()=>{
+        S.chosen = { regional: [] };
+        c.querySelectorAll("input[type=checkbox]:checked").forEach(cb=>
+          S.chosen.regional.push(cb.value)
+        );
+        S.bbRounds = 2;
+        summary();
+      };
+      app.appendChild(c);
+    }
+
+    // Main picker
     function picker(){
       const req=phaseCounts[S.phase];
       app.innerHTML="";
-      const c=document.createElement("div");c.className="card";
+      const c=document.createElement("div"); c.className="card";
       c.innerHTML=`<div class="title">5️⃣ Choose Your Lifts</div>`;
       Object.entries(req).forEach(([cat,cnt])=>{
+        // Aerobic & Recovery only BB
+        if((S.track==="aero"||S.track==="recovery")&&cat!=="regional") return;
+        // Speed/Power exclude regional
+        if(S.track==="speed"&&cat==="regional") return;
+        // Glycolytic allows all
         if(cnt>0){
           c.insertAdjacentHTML("beforeend",
             `<div class="cat-head">${cat.toUpperCase()} (choose ${cnt})</div>`);
-          const box=document.createElement("div");box.className="options";c.appendChild(box);
+          const box=document.createElement("div"); box.className="options"; c.appendChild(box);
           LIFTS[cat].forEach(ex=>box.insertAdjacentHTML("beforeend",
             `<label class="opt"><input type="checkbox" data-cat="${cat}" value="${ex}"><span>${ex}</span></label>`));
         }
       });
-      const btn=document.createElement("button");btn.className="next";
-      btn.textContent="Finish";btn.disabled=true;c.appendChild(btn);
+      const btn=document.createElement("button"); btn.className="next"; 
+      btn.textContent="Finish"; btn.disabled=true; c.appendChild(btn);
       c.addEventListener("change",()=>{
         const cnts={olympic:0,ballistic:0,static:0,regional:0};
         c.querySelectorAll("input[type=checkbox]:checked").forEach(x=>cnts[x.dataset.cat]++);
-        btn.disabled=!Object.entries(req).every(([k,v])=>cnts[k]===v);
+        btn.disabled=!Object.entries(phaseCounts[S.phase]).every(([k,v])=>{
+          // adjust for track type
+          if(S.track==="aero"||S.track==="recovery") return k==="regional"?true:cnts[k]===0; 
+          if(S.track==="speed"&&k==="regional") return true;
+          return cnts[k]===v;
+        });
       });
       btn.onclick=()=>{
         S.chosen={};
@@ -217,19 +459,21 @@
       app.appendChild(c);
     }
 
+    // Summary
     function summary(){
       app.innerHTML="";
-      const c=document.createElement("div");c.className="card";
+      const c=document.createElement("div"); c.className="card";
       c.innerHTML=`<h2 class="title">🏅 Your Workout</h2><ul></ul>`;
       const ul=c.querySelector("ul");
       Object.entries(S.chosen).forEach(([cat,list])=>{
         list.forEach(ex=>{
+          // pick scheme key per category + phase
           let key = cat==="bb"?"BB"
-                  : cat==="olympic"? (S.phase==="trans"?"RFDP":"BPD")
-                  : cat==="ballistic"? (S.phase==="real"?"RFD":"BPD")
-                  : cat==="static"? (["acc","trans"].includes(S.phase)?"ASD":"ASP")
-                  : cat==="regional"? (S.phase==="acc"?"ASP":S.phase==="trans"?"ASC":S.phase==="real"?"RS":"BB")
-                  : "BB";
+                  :cat==="olympic"? (S.phase==="trans"?"RFDP":"BPD")
+                  :cat==="ballistic"? (S.phase==="real"?"RFD":"BPD")
+                  :cat==="static"? (["acc","trans"].includes(S.phase)?"ASD":"ASP")
+                  :cat==="regional"? (S.phase==="acc"?"ASP":S.phase==="trans"?"ASC":S.phase==="real"?"RS":"BB")
+                  :"BB";
           const cfg=SCHEMES[key];
           const line = key==="BB"
             ? `${ex} — ${cfg.reps} reps; rest ${cfg.rest}`
@@ -240,10 +484,27 @@
       if(S.chosen.bb){
         c.insertAdjacentHTML("beforeend",`<p><em>Complete ${S.bbRounds} round(s).</em></p>`);
       }
-      const btn=document.createElement("button");btn.className="next";
-      btn.textContent="Start Over";btn.onclick=start;c.appendChild(btn);
+      const btn=document.createElement("button"); btn.className="next";
+      btn.textContent="Start Over"; btn.onclick=start; c.appendChild(btn);
       app.appendChild(c);
     }
+
+// Show in‑app modal
+function showModal(text) {
+  const overlay = document.getElementById("modalOverlay");
+  const content = document.getElementById("modalContent");
+  content.textContent = text;
+  overlay.classList.add("active");
+}
+// Hide it
+document.getElementById("modalClose").onclick = () => {
+  document.getElementById("modalOverlay").classList.remove("active");
+};
+document.getElementById("modalOverlay").onclick = e => {
+  if (e.target.id === "modalOverlay") {
+    e.currentTarget.classList.remove("active");
+  }
+};
 
     function start(){ S={}; app.innerHTML=""; stepMacro(); }
     document.addEventListener("DOMContentLoaded", start);
