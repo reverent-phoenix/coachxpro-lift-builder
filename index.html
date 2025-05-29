@@ -8,264 +8,244 @@
     :root { --red: #e10b0b; --gray: #f4f4f4; }
     #app, * { box-sizing: border-box; font-family: system-ui, sans-serif; }
     #app { max-width: 720px; margin: 2rem auto; padding: 1rem; }
-    .card { background: var(--gray); border-radius: 1rem; padding: 1rem; margin-bottom: 1.25rem; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
-    .title { font-weight: 600; margin-bottom: 0.5rem; }
-    .options { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.25rem; }
-    .opt { display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem; border: 2px solid transparent; border-radius: 0.75rem; background: #fff; cursor: pointer; }
-    .opt:hover { border-color: var(--red); }
-    .opt input { accent-color: var(--red); }
-    .opt input:checked + span { font-weight: 600; color: var(--red); }
-    button.next { width: 100%; padding: 0.75rem; background: var(--red); color: #fff; font-weight: 600; border: none; border-radius: 0.75rem; margin-top: 1rem; }
-    button.next:disabled { opacity: 0.5; }
-    .cat-head { margin: 0.75rem 0 0.25rem; font-weight: 600; }
-    a { text-decoration: none; color: inherit; }
+    .card { background: var(--gray); border-radius: 1rem; padding: 1rem; margin-bottom: 1.25rem; box-shadow:0 4px 8px rgba(0,0,0,0.05); }
+    .title { font-weight:600; margin-bottom:0.5rem; }
+    .options { display:flex; flex-direction:column; gap:0.5rem; margin-top:0.25rem; }
+    .opt { display:flex; align-items:center; gap:0.5rem; padding:0.75rem 1rem; border:2px solid transparent; border-radius:0.75rem; background:#fff; cursor:pointer; }
+    .opt:hover { border-color:var(--red); }
+    .opt input { accent-color:var(--red); }
+    .opt input:checked + span { font-weight:600; color:var(--red); }
+    .info-icon { margin-left:0.5rem; cursor:pointer; font-size:1rem; }
+    button.next { width:100%; padding:0.75rem; background:var(--red); color:#fff; font-weight:600; border:none; border-radius:0.75rem; margin-top:1rem; }
+    button.next:disabled { opacity:0.5; }
+    .cat-head { margin:0.75rem 0 0.25rem; font-weight:600; }
+    a { text-decoration:none; color:inherit; }
   </style>
 </head>
 <body>
   <div id="app"></div>
   <script>
-    // --- Data ---
+    // --- Data Pools ---
     const BB_CIRCUITS = {
       1: ["Rotational Step-Ups (L-R)","Flys (bench)","Lunges (L-R)","Lat Pulldown","Stooped Russian Twists w/ stop","Good Mornings","DB Alternating Toe Touches","V-Sits","Hanging Lateral Leg Lifts","Twisting Sit-ups","Pullovers","Russian Twists (Hay Bales)"],
       2: ["Lunge w/ Twist","Single-Arm Bent Over Row","Weighted Crunches","Straight-Leg Deadlift","Arm Curls","Seated Shoulder Press","Lat Pulldown","DB Alternating Toe Touches","Dips","Hanging Leg Lifts","Push-ups (feet up)","Back Hypers","Pull-ups"],
       3: ["Russian Twists – Standing","Arm Curls","DB Lateral Flys","DB Alternating Toe Touches","Rotational Step-Ups","Weighted Crunches","Inverted Row","Russian Twist Lunge","Hanging Knee Raises","Single-Arm Row","Military Press","Straight-Leg Deadlift","Weighted Back Hyper","Hanging L's"],
       4: ["V-Sits","Hanging L's","Russian Twist - Overhead Twists","Seated Good Mornings","Seated DB Shoulder Press","Hanging Leg Lifts","Lat Pulldowns","Single-Arm Curls","Back Hyper w/Twist","Inverted Row","DB Alternating Toe Touch","Repeated Crossover Step Ups (L-R)","Weighted Crunches","Single-arm Bent Over Row","Military Press","Weighted Back Hyper","Toe Risers","Russian Twist Standing w/Bar","V-Sits","Hanging Lateral Knee Lifts"]
     };
-    const REGIONAL  = ["RDL","Hip Thrust","Step-Ups","DB Row","Lat Pull-Down","Nordic Curl"];
-    const OLYMPIC   = ["Power Clean","Hang Clean","Power Snatch","Mid-Thigh Clean Pull","Snatch Pull","Clean Pull","DB Snatch"];
-    const STATIC    = ["Back Squat","Front Squat","Trap-Bar Deadlift","Conventional Deadlift","Split Squat (heavy)","Bench Press","Incline Bench","Weighted Pull-ups","Military Press","Weighted Dips"];
-    const RS        = ["Continuous Hurdle Hops","Bounding Series","Single-Leg Pogos","Overhead Back MB Heave"];
-    const LIFTS     = { static: STATIC, regional: REGIONAL, olympic: OLYMPIC, rs: RS };
+    const OLYMPIC   = ["Power Clean","Hang Clean","Power Snatch","Mid‑Thigh Pull","Snatch Pull","Clean Pull","DB Snatch"];
+    const BALLISTIC = ["Jump Squat","Trap‑Bar Jump","Bench Press Throw","Med‑Ball Throw","Split‑Jerk Jump"];
+    const STATIC    = ["Back Squat","Front Squat","Trap‑Bar Deadlift","Conventional Deadlift","Split Squat","Bench Press","Incline Bench","Weighted Pull‑ups","Military Press","Weighted Dips"];
+    const REGIONAL  = ["RDL","Hip Thrust","Step‑Ups","DB Row","Lat Pull‑Down","Nordic Curl"];
+    const LIFTS     = { olympic:OLYMPIC, ballistic:BALLISTIC, static:STATIC, regional:REGIONAL };
 
+    // --- Schemes (added RS for realization regional) ---
     const SCHEMES = {
-      BPD:  { sets:"4-5", reps:"4-5", pct:"50-65%",  rest:"2-3 min" },
-      ASP:  { sets:"3-6", reps:"5-8", pct:"60-80%",  rest:"3-5 min" },
-      BB:   { reps:"10-12", rest:"60-90 s" },
-      RFDP: { sets:"4-9", reps:"2-4", pct:"70-85%",  rest:"2-3 min" },
-      ASD:  { sets:"4-8", reps:"1-5", pct:"80-100%", rest:"3-5 min" },
-      ASC:  { sets:"3-6", reps:"4-8", pct:"60-80%",  rest:"2-3 min" },
-      RFD:  { sets:"5-9", reps:"1-2", pct:"90-100%", rest:"3-5 min" },
-      RS:   { sets:"3-8", reps:"5-12", pct:"Bodyweight‑50%", rest:"1-2 min" }
+      BPD: { sets:"4-9", reps:"4-5", pct:"50-65%", rest:"2-3 min" },
+      RFDP: { sets:"4-9", reps:"2-4", pct:"70-85%", rest:"2-3 min" },
+      RFD: { sets:"5-9", reps:"1-2", pct:"90-100%",rest:"Complete" },
+      ASD: { sets:"4-8", reps:"1-5", pct:"80-100%",rest:"Complete" },
+      ASC: { sets:"3-6", reps:"4-8", pct:"60-80%", rest:"2-3 min" },
+      ASP: { sets:"3-6", reps:"5-8",pct:"60-80%", rest:"2-3 min" },
+      BB: { reps:"10-12", rest:"60-90 s" },
+      RS: { sets:"3-8", reps:"5-12", pct:"10-50% BW", rest:"Sufficient to ensure quality w/ slight lactate accumulation" }
     };
 
-    const phaseSchemes = {
-      acc:   { olympic:["BPD"],          static:["ASP"],    regional:["BB"],    rs:[]    },
-      trans: { olympic:["RFDP","BPD"],   static:["ASD","ASC"],regional:["BB"],  rs:[]    },
-      real:  { olympic:["RFD"],          static:["ASD"],    regional:[],        rs:[]    },
-      main:  { olympic:["BPD"],          static:["ASP"],    regional:[],        rs:["RS"]},
-      rest:  { olympic:[],               static:[],         regional:[],        rs:[]    }
+    // --- Per‑phase counts ---
+    const phaseCounts = {
+      acc:   { olympic:1, ballistic:1, static:2, regional:2 },
+      trans: { olympic:1, ballistic:1, static:2, regional:1 },
+      real:  { olympic:1, ballistic:1, static:1, regional:1 },
+      main:  { olympic:1, ballistic:1, static:1, regional:0 }
     };
 
-    // --- App Logic ---
-    let S = {}, app = document.getElementById("app");
+    // --- Microcycle & Info ---
+    const microMap = {
+      acc:   [{t:"Foundation Week",v:"foundation"},{t:"Volume Week",v:"volume"},{t:"Power Week",v:"power"},{t:"Regeneration Week",v:"regeneration"}],
+      trans: [{t:"Integration Week",v:"integration"},{t:"Conversion Week",v:"conversion"},{t:"Intensification Week",v:"intensification"},{t:"Restoration Week",v:"restoration"}],
+      real:  [{t:"Peak Intensity Week",v:"peak"},{t:"Competition Simulation",v:"competition"},{t:"Taper Week",v:"taper"},{t:"Recovery Week",v:"recovery"}],
+      main:  [{t:"Retention Week",v:"retention"},{t:"Potentiation Week",v:"potentiation"},{t:"Load Mgmt Week",v:"load_management"},{t:"Recovery Week",v:"recovery"}]
+    };
+    const microInfo = {
+      foundation:      "Foundation: light‑moderate loads, technique, mobility.",
+      volume:          "Volume: higher rep‑volume for work capacity.",
+      power:           "Power: explosive Olympic/ballistic emphasis.",
+      regeneration:    "Regeneration: active recovery, low load.",
+      integration:     "Integration: combine general & specific work.",
+      conversion:      "Conversion: shift toward sport‑specific power.",
+      intensification: "Intensification: heavy loads, low reps.",
+      restoration:     "Restoration: planned deload & recovery.",
+      peak:            "Peak: near-max intensity, low volume.",
+      competition:     "Competition Simulation: mimic meet demands.",
+      taper:           "Taper: reduce volume, maintain intensity.",
+      recovery:        "Recovery: active rest, restore energy.",
+      retention:       "Retention: maintain gains, minimal volume.",
+      potentiation:    "Potentiation: low‑volume, high‑intent work.",
+      load_management: "Load Mgmt: adjust around competition load."
+    };
 
-    function createRadio(title, opts, key, cb) {
-      const card = document.createElement("div"); card.className="card";
-      card.innerHTML = `<div class="title">${title}</div>`;
-      const box = document.createElement("div"); box.className="options"; card.appendChild(box);
-      opts.forEach(o=>{
-        box.insertAdjacentHTML("beforeend",
-          `<label class="opt">
-             <input type="radio" name="${key}" value="${o.v}">
-             <span>${o.t}</span>
-           </label>`);
-      });
-      const btn = document.createElement("button"); btn.className="next";
-      btn.textContent="Next"; btn.disabled=true; card.appendChild(btn);
-      card.addEventListener("change", ()=> btn.disabled=false);
-      btn.onclick = ()=> { S[key] = card.querySelector("input:checked").value; cb(); };
-      return card;
+    let S={}, app=document.getElementById("app");
+
+    function createRadio(title, opts, key, cb){
+      const c=document.createElement("div");c.className="card";
+      c.innerHTML=`<div class="title">${title}</div>`;
+      const box=document.createElement("div");box.className="options";c.appendChild(box);
+      opts.forEach(o=>box.insertAdjacentHTML("beforeend",
+        `<label class="opt"><input type="radio" name="${key}" value="${o.v}"><span>${o.t}</span></label>`));
+      const btn=document.createElement("button");btn.className="next";
+      btn.textContent="Next";btn.disabled=true;c.appendChild(btn);
+      c.addEventListener("change",()=>btn.disabled=false);
+      btn.onclick=()=>{ S[key]=c.querySelector("input:checked").value; cb(); };
+      return c;
     }
 
-    function stepSeason() {
-      app.innerHTML="";
-      app.appendChild(createRadio(
-        "1️⃣ What season are you in right now?",
+    function stepMacro(){
+      app.innerHTML=""; 
+      app.appendChild(createRadio("1️⃣ What season are you in right now?",
         [
-          {t:"Off‑Season / Accumulation (Jun–Aug)", v:"off"},
-          {t:"Pre‑Season / Transmutation (Sep–Nov)", v:"pre"},
-          {t:"Indoor / Realization (Dec–Feb)", v:"indoor"},
-          {t:"Outdoor / Maintenance (Mar–May)", v:"outdoor"},
-          {t:"Transition / Active Recovery", v:"rest"}
+          {t:"Off‑Season / Accumulation (Jun–Aug)",v:"acc"},
+          {t:"Pre‑Season / Transmutation (Sep–Nov)",v:"trans"},
+          {t:"Indoor Season / Realization (Dec–Feb)",v:"real"},
+          {t:"Outdoor Season / Maintenance (Mar–May)",v:"main"} 
         ],
-        "season", stepMicro
+        "phase", stepMicro
       ));
     }
 
-    function stepMicro() {
-      const phaseMap = { off:"acc", pre:"trans", indoor:"real", outdoor:"main", rest:"rest" };
-      S.phase = phaseMap[S.season];
+    function stepMicro(){
       app.innerHTML="";
-      const microMap = {
-        acc:   [{t:"Foundation Week",v:"foundation"},{t:"Volume Week",v:"volume"},{t:"Power Week",v:"power"},{t:"Regeneration Week",v:"regeneration"}],
-        trans: [{t:"Integration Week",v:"integration"},{t:"Conversion Week",v:"conversion"},{t:"Intensification Week",v:"intensification"},{t:"Restoration Week",v:"restoration"}],
-        real:  [{t:"Peak Intensity Week",v:"peak"},{t:"Competition Simulation Week",v:"competition"},{t:"Taper Week",v:"taper"},{t:"Recovery Week",v:"recovery"}],
-        main:  [{t:"Retention Week",v:"retention"},{t:"Potentiation Week",v:"potentiation"},{t:"Load Mgmt Week",v:"load_management"},{t:"Recovery Week",v:"recovery"}],
-        rest:  [{t:"Active Recovery",v:"active_recovery"}]
-      };
-      app.appendChild(createRadio(
-        "2️⃣ Which microcycle are you in?",
-        microMap[S.phase],
-        "micro", stepTrack
-      ));
+      const opts=microMap[S.phase];
+      const card=createRadio("2️⃣ Which microcycle (week) are you in?",opts,"micro",stepTrack);
+      opts.forEach(o=>{
+        const inp=card.querySelector(`input[value="${o.v}"]`);
+        const lab=inp.closest("label");
+        const info=document.createElement("span");
+        info.className="info-icon"; info.textContent="ℹ️";
+        info.onclick=()=>alert(microInfo[o.v]||"");
+        lab.appendChild(info);
+      });
+      app.appendChild(card);
     }
 
-    function stepTrack() {
+    function stepTrack(){
       app.innerHTML="";
-      app.appendChild(createRadio(
-        "3️⃣ What did you do on the track today?",
+      app.appendChild(createRadio("3️⃣ What did/will you do on the track today?",
         [
-          {t:"Speed / Power",v:"speed"},
-          {t:"Strength / No Sprints",v:"strength"},
-          {t:"Recovery / Tempo",v:"recovery"},
-          {t:"Endurance / Lactate",v:"endurance"}
+          {t:"Speed / Power",v:"speed"},
+          {t:"Strength / No Sprints",v:"strength"},
+          {t:"Recovery / Tempo",v:"recovery"},
+          {t:"Endurance / Lactate",v:"endurance"}
         ],
         "track", stepRecovery
       ));
     }
 
-    function stepRecovery() {
+    function stepRecovery(){
       app.innerHTML="";
-      app.appendChild(createRadio(
-        "4️⃣ How do you feel right now?",
+      app.appendChild(createRadio("4️⃣ How do you feel?",
         [
           {t:"Fresh",v:"fresh"},
-          {t:"Moderately Fatigued",v:"mod"},
-          {t:"Very Sore",v:"sore"}
+          {t:"Somewhat Fatigued",v:"mod"},
+          {t:"Very Sore (BB Only)",v:"sore"}
         ],
         "recovery", stepWorkoutChoice
       ));
     }
 
-    function stepWorkoutChoice() {
-      if (S.recovery === "sore") {
-        S.forceBB = true;
-        bodybuildingPicker();
-      } else if (S.recovery === "mod") {
+    function stepWorkoutChoice(){
+      if(S.recovery==="sore"){
+        S.forceBB=true; return bodybuildingPicker();
+      }
+      if(S.recovery==="mod"){
         app.innerHTML="";
-        app.appendChild(createRadio(
-          "5️⃣ You’re moderately fatigued—what would you like to do today?",
+        return app.appendChild(createRadio("5️⃣ You’re fatigued—pick session",
           [
-            {t:"Primary Session",v:"primary"},
+            {t:"Primary Lift Session",v:"primary"},
             {t:"Bodybuilding Circuit",v:"bb"}
           ],
-          "todayChoice",
-          () => {
-            if (S.todayChoice === "bb") bodybuildingPicker();
-            else picker();
-          }
+          "today", ()=>S.today==="bb"?bodybuildingPicker():picker()
         ));
-      } else {
-        picker();
       }
+      picker();
     }
 
-    function bodybuildingPicker() {
+    function bodybuildingPicker(){
       app.innerHTML="";
-      const c = document.createElement("div"); c.className="card";
-      c.innerHTML = `<div class="title">🏋️‍♀️ Choose a Bodybuilding Circuit</div>
-                     <p>10–12 reps each, rest 60–90 s between exercises</p>`;
-      Object.entries(BB_CIRCUITS).forEach(([n,arr])=>{
+      const c=document.createElement("div");c.className="card";
+      c.innerHTML=`<div class="title">🏋️ Bodybuilding Circuit</div><p>10–12 reps; rest 60–90 s</p>`;
+      Object.entries(BB_CIRCUITS).forEach(([n,a])=>{
         c.insertAdjacentHTML("beforeend",
-          `<label class="opt">
-             <input type="radio" name="bbc" value="${n}">
-             <span>Circuit #${n} (${arr.length} exercises)</span>
-           </label>`
+          `<label class="opt"><input type="radio" name="bbc" value="${n}"><span>Circuit #${n} (${a.length})</span></label>`);
+      });
+      const btn=document.createElement("button");btn.className="next";
+      btn.textContent="Finish";btn.disabled=true;c.appendChild(btn);
+      c.addEventListener("change",()=>btn.disabled=!c.querySelector("input:checked"));
+      btn.onclick=()=>{
+        const n=c.querySelector("input:checked").value;
+        S.chosen={bb:BB_CIRCUITS[n]}; S.bbRounds=S.forceBB?1:2; summary();
+      };
+      app.appendChild(c);
+    }
+
+    function picker(){
+      const req=phaseCounts[S.phase];
+      app.innerHTML="";
+      const c=document.createElement("div");c.className="card";
+      c.innerHTML=`<div class="title">5️⃣ Choose Your Lifts</div>`;
+      Object.entries(req).forEach(([cat,cnt])=>{
+        if(cnt>0){
+          c.insertAdjacentHTML("beforeend",
+            `<div class="cat-head">${cat.toUpperCase()} (choose ${cnt})</div>`);
+          const box=document.createElement("div");box.className="options";c.appendChild(box);
+          LIFTS[cat].forEach(ex=>box.insertAdjacentHTML("beforeend",
+            `<label class="opt"><input type="checkbox" data-cat="${cat}" value="${ex}"><span>${ex}</span></label>`));
+        }
+      });
+      const btn=document.createElement("button");btn.className="next";
+      btn.textContent="Finish";btn.disabled=true;c.appendChild(btn);
+      c.addEventListener("change",()=>{
+        const cnts={olympic:0,ballistic:0,static:0,regional:0};
+        c.querySelectorAll("input[type=checkbox]:checked").forEach(x=>cnts[x.dataset.cat]++);
+        btn.disabled=!Object.entries(req).every(([k,v])=>cnts[k]===v);
+      });
+      btn.onclick=()=>{
+        S.chosen={};
+        c.querySelectorAll("input[type=checkbox]:checked").forEach(x=>
+          (S.chosen[x.dataset.cat]=S.chosen[x.dataset.cat]||[]).push(x.value)
         );
-      });
-      const btn = document.createElement("button"); btn.className="next";
-      btn.textContent="Finish"; btn.disabled=true; c.appendChild(btn);
-      c.addEventListener("change", ()=> btn.disabled = !c.querySelector("input:checked"));
-      btn.onclick = ()=>{
-        const n = c.querySelector("input[name='bbc']:checked").value;
-        S.chosen = { bb: BB_CIRCUITS[n] };
-        S.bbRounds = S.forceBB ? 1 : 2;
         summary();
       };
       app.appendChild(c);
     }
 
-    function picker() {
-      S.scheme_olympic   = phaseSchemes[S.phase].olympic[0]   || null;
-      S.scheme_static    = phaseSchemes[S.phase].static[0]    || null;
-      S.scheme_regional  = phaseSchemes[S.phase].regional[0]  || null;
-      S.scheme_rs        = phaseSchemes[S.phase].rs[0]        || null;
-
-      const req = {
-        olympic:  S.scheme_olympic   ? 1 : 0,
-        static:   S.scheme_static    ? 1 : 0,
-        regional: S.scheme_regional  ? 1 : 0,
-        rs:       S.scheme_rs        ? 1 : 0,
-        bb:       0
-      };
-
+    function summary(){
       app.innerHTML="";
-      const c = document.createElement("div"); c.className="card";
-      c.innerHTML = `<div class="title">🏋️ Choose Your Lifts</div>`;
-
-      ["olympic","static","regional","rs"].forEach(cat=>{
-        if (!req[cat]) return;
-        c.insertAdjacentHTML("beforeend",`<div class="cat-head">${cat.toUpperCase()} (choose 1)</div>`);
-        const box = document.createElement("div"); box.className="options"; c.appendChild(box);
-        LIFTS[cat].forEach(l=>{
-          box.insertAdjacentHTML("beforeend",
-            `<label class="opt">
-               <input type="checkbox" data-cat="${cat}" value="${l}">
-               <span>${l}</span>
-             </label>`
-          );
-        });
-      });
-
-      const btn = document.createElement("button"); btn.className="next"; btn.textContent="Finish"; btn.disabled=true; c.appendChild(btn);
-      c.addEventListener("change", ()=>{
-        const cnt = { olympic:0, static:0, regional:0, rs:0, bb:0 };
-        c.querySelectorAll("input[type='checkbox']:checked").forEach(x=>cnt[x.dataset.cat]++);
-        const ok = Object.keys(req).every(k => cnt[k] === req[k]);
-        btn.disabled = !ok;
-      });
-      btn.onclick = ()=>{
-        S.chosen = {};
-        c.querySelectorAll("input[type='checkbox']:checked").forEach(x=>{
-          (S.chosen[x.dataset.cat] = S.chosen[x.dataset.cat]||[]).push(x.value);
-        });
-        summary();
-      };
-
-      app.appendChild(c);
-    }
-
-    function summary() {
-      app.innerHTML="";
-      const c = document.createElement("div"); c.className="card";
-      c.innerHTML = `<h2 class="title">🏅 Your Workout</h2><ul></ul>`;
-      const ul = c.querySelector("ul");
-
+      const c=document.createElement("div");c.className="card";
+      c.innerHTML=`<h2 class="title">🏅 Your Workout</h2><ul></ul>`;
+      const ul=c.querySelector("ul");
       Object.entries(S.chosen).forEach(([cat,list])=>{
-        list.forEach(l=>{
-          let schemeKey = "BB";
-          if (cat==="olympic")  schemeKey = S.scheme_olympic;
-          if (cat==="static")   schemeKey = S.scheme_static;
-          if (cat==="regional") schemeKey = S.scheme_regional==="BB" ? "BB" : S.scheme_regional;
-          if (cat==="rs")       schemeKey = S.scheme_rs;
-          const cfg = SCHEMES[schemeKey];
-          const text = schemeKey==="BB"
-            ? `${l} — ${cfg.reps} reps @ Bodyweight, rest ${cfg.rest}`
-            : `${l} — ${cfg.sets}×${cfg.reps} @ ${cfg.pct}, rest ${cfg.rest}`;
-          ul.insertAdjacentHTML("beforeend", `<li>${text}</li>`);
+        list.forEach(ex=>{
+          let key = cat==="bb"?"BB"
+                  : cat==="olympic"? (S.phase==="trans"?"RFDP":"BPD")
+                  : cat==="ballistic"? (S.phase==="real"?"RFD":"BPD")
+                  : cat==="static"? (["acc","trans"].includes(S.phase)?"ASD":"ASP")
+                  : cat==="regional"? (S.phase==="acc"?"ASP":S.phase==="trans"?"ASC":S.phase==="real"?"RS":"BB")
+                  : "BB";
+          const cfg=SCHEMES[key];
+          const line = key==="BB"
+            ? `${ex} — ${cfg.reps} reps; rest ${cfg.rest}`
+            : `${ex} — ${cfg.sets}×${cfg.reps} @ ${cfg.pct}, rest ${cfg.rest}`;
+          ul.insertAdjacentHTML("beforeend",`<li>${line}</li>`);
         });
       });
-
-      if (S.chosen.bb) {
-        c.insertAdjacentHTML("beforeend", `<p><em>Complete ${S.bbRounds} circuit round(s).</em></p>`);
+      if(S.chosen.bb){
+        c.insertAdjacentHTML("beforeend",`<p><em>Complete ${S.bbRounds} round(s).</em></p>`);
       }
-
-      const btn = document.createElement("button"); btn.className="next"; btn.textContent="Start Over";
-      btn.onclick = start; c.appendChild(btn);
+      const btn=document.createElement("button");btn.className="next";
+      btn.textContent="Start Over";btn.onclick=start;c.appendChild(btn);
       app.appendChild(c);
     }
 
-    function start() { S = {}; app.innerHTML=""; stepSeason(); }
+    function start(){ S={}; app.innerHTML=""; stepMacro(); }
     document.addEventListener("DOMContentLoaded", start);
   </script>
 </body>
